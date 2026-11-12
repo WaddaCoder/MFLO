@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MFLO Navigator v2.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D1520;--card:#131E2D;--card2:#182639;--line:#223249;--accent:#3A7BD5;--gold:#C9A84C;--cream:#F3E9D2;--green:#5FBF8A;--text:#D7DEE8;--mut:#8393A8;--red:#D9776B;--fs:1.2}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#080E16}
+body{color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5;-webkit-text-size-adjust:100%}
+h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);font-size:calc(14px*var(--fs));padding:16px 14px 20px}
+@media(min-width:1024px){.app{max-width:1280px;padding:24px 40px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;align-items:start}}
+.title{font-size:1.9em;line-height:1.1;color:var(--cream);font-weight:600}
+.sub{color:var(--mut);font-size:.8em;margin-top:2px}
+.search{width:100%;margin:14px 0 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--cream);font:inherit;font-size:.85em;outline:none}
+.search:focus{border-color:var(--accent)}
+.toggle{display:flex;align-items:center;gap:10px;font-size:.8em;color:var(--mut);margin-bottom:14px;cursor:pointer;user-select:none}
+.sw{width:38px;height:22px;border-radius:12px;background:var(--line);position:relative;transition:.2s;flex:none}
+.sw:after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--mut);transition:.2s}
+.on .sw{background:var(--accent)}.on .sw:after{left:19px;background:#fff}
+.arcs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.arc{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}
+.arc h3{font-size:1.25em;color:var(--cream);line-height:1.15}
+.arc p{font-size:.72em;color:var(--mut);margin-top:6px}
+.arc.a1{border-top:3px solid var(--accent)}.arc.a2{border-top:3px solid var(--gold)}
+.pills{display:flex;gap:8px;margin:0 0 12px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0;flex-wrap:wrap}
+.pill{font-size:.72em;border:1px solid var(--line);border-radius:20px;padding:4px 12px;color:var(--mut);background:var(--card);cursor:pointer}
+.pill.on{color:var(--bg);background:var(--gold);border-color:var(--gold);font-weight:600}
+.mod{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.mod.g{border-left-color:var(--gold)}.mod.f{border-left-color:var(--mut)}
+.mod.soon{opacity:.45;cursor:default}
+.mod .n{font-family:'Cormorant Garamond',serif;font-size:1.5em;color:var(--mut);width:22px}
+.mod .t{flex:1;font-size:.88em;color:var(--cream);font-weight:500;line-height:1.25}
+.mod .t small{display:block;color:var(--mut);font-weight:400;font-size:.8em}
+.sec{font-size:.65em;border-radius:20px;padding:2px 8px;background:#1A2A42;color:#9DB8E0;white-space:nowrap}
+.sec.gt{background:#3a2f12;color:var(--gold)}
+.empty{color:var(--mut);font-size:.85em;padding:14px 0}
+.foot{margin:18px 0 8px;padding:0 14px;text-align:center;font-size:.65em;line-height:1.6;color:var(--mut);overflow-wrap:anywhere}.foot span{display:block}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.home-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:15px;cursor:pointer}
+.tag{font-size:.6em;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:2px 9px}
+.intro{font-size:.85em;margin:6px 0 12px}
+.msearch{display:flex;gap:8px;margin-bottom:12px}
+.msearch input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 11px;font:inherit;font-size:.78em;color:var(--cream);outline:none;min-width:0}
+.msearch button{border:1px solid var(--line);border-radius:10px;padding:7px 11px;font:inherit;font-size:.72em;color:var(--mut);background:transparent;cursor:pointer}
+.rail{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.rail.open{border-color:#2d4a73}
+.rh{padding:11px 13px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.rh .c{font-family:'Cormorant Garamond',serif;font-size:1.25em;color:var(--gold);min-width:46px}
+.rh .tt{flex:1}
+.rh .tt b{display:block;color:var(--cream);font-weight:600;font-size:.92em}
+.rh .tt em{display:block;font-style:normal;color:var(--mut);font-size:.75em}
+.rh:after{content:"+";color:var(--mut);font-size:1.2em}
+.rail.open .rh:after{content:"\2212"}
+.mk{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.mk i{font-style:normal;font-size:.66em;border-radius:6px;padding:1px 7px}
+.ess{color:var(--gold);border:1px solid #6b5a2a}.exam{color:#8DB5F0;border:1px solid #2d4a73}.tests{color:var(--mut);font-style:italic!important}
+.rb{padding:0 13px 13px;display:none}
+.rail.open .rb{display:block}
+.hook{background:linear-gradient(135deg,#2a2210,#1d1a10);border:1px solid #5a4a1e;border-radius:12px;padding:10px 12px;font-family:'Cormorant Garamond',serif;font-size:1.15em;color:#F1DFA6;line-height:1.3;margin-bottom:10px}
+.pos{background:#16120a;border-left:3px solid var(--gold);border-radius:6px;padding:10px 12px;color:var(--cream);font-size:.82em;line-height:1.55;margin-bottom:10px}
+.pos b{color:var(--gold)}
+.pw{font-size:.8em;margin-bottom:10px}
+.pw div{padding:5px 0;border-bottom:1px dashed var(--line)}
+.pw strong{color:var(--cream)}
+.links{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.xlink{font-size:.7em;background:#142238;color:#9DB8E0;border:1px solid #2d4a73;border-radius:20px;padding:3px 10px;cursor:pointer}
+.cases{border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin-bottom:10px;background:var(--card2)}
+.cases h4{font-family:Inter,sans-serif;font-size:.7em;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;font-weight:500}
+.case{font-size:.8em;margin-bottom:6px}.case b{color:var(--cream)}
+.flag{display:inline-block;font-size:.65em;background:#3b1f1b;color:var(--red);border-radius:6px;padding:0 6px;margin-left:6px}
+.bnd{background:#0f1f19;border:1px solid #1f4a37;border-radius:12px;padding:9px 11px;margin-bottom:10px;font-size:.8em;color:#BFE6D0}
+.bnd h4{font-family:Inter,sans-serif;font-size:.7em;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:6px;font-weight:500}
+.bnd p{margin-top:6px;font-size:.92em}
+table{width:100%;border-collapse:collapse;font-size:.92em}
+td,th{border-top:1px solid #1f4a37;padding:4px 5px;text-align:left;vertical-align:top}
+th{color:var(--green);font-weight:600}
+.spar{border:1px dashed var(--line);border-radius:10px;padding:8px 11px;margin-top:12px;font-size:.8em}
+.spar summary{cursor:pointer;color:var(--mut)}
+.sq{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.sq p{color:var(--cream)}
+.sq textarea{width:100%;margin-top:6px;min-height:60px;background:var(--card);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:7px;font:inherit;font-size:.95em}
+.sq button{margin-top:6px;background:var(--accent);color:#fff;border:0;border-radius:8px;padding:5px 12px;font:inherit;font-size:.85em;cursor:pointer}
+.sq .ans{display:none;margin-top:8px;background:#0f1f19;border:1px solid #1f4a37;border-radius:8px;padding:8px;color:#BFE6D0}
+.sq.show .ans{display:block}
+.legend{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:.72em;color:var(--mut);background:var(--card)}
+.legend i{font-style:normal}
+.navrow{display:flex;gap:8px;margin-top:12px}
+.navrow div{flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 11px;background:var(--card);font-size:.75em;color:var(--cream)}
+.navrow div.soon{opacity:.4}
+.navrow small{display:block;color:var(--mut)}
+.fb{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;font-size:.78em;color:var(--mut)}
+.fb b{border:1px solid var(--line);border-radius:8px;padding:2px 10px;color:var(--cream);cursor:pointer;font-weight:600}
+.gate{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 12px 4px;margin-bottom:14px}
+.gate h3{font-size:1.25em;color:var(--cream);margin-bottom:8px}
+.step{display:flex;gap:11px}
+.rail-l{display:flex;flex-direction:column;align-items:center}
+.dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.7em;color:var(--mut);background:var(--bg);flex:none}
+.done .dot{background:var(--green);border-color:var(--green);color:var(--bg)}
+.act .dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.15)}
+.ln{flex:1;width:2px;background:var(--line);min-height:14px}
+.done .ln{background:var(--green)}
+.sb{flex:1;padding-bottom:12px;min-width:0}
+.sb b{display:block;font-size:.88em;color:var(--cream)}
+.sb small{display:block;color:var(--mut);font-size:.75em}
+.sb .nt{font-size:.78em;color:var(--text);margin-top:3px}
+.pend .sb b{color:var(--mut)}
+.q{margin-top:8px;background:var(--card2);border:1px solid #5a4a1e;border-radius:12px;padding:10px 12px;font-size:.82em;color:var(--cream)}
+.btns{display:flex;gap:8px;margin-top:9px}
+.btn{flex:1;text-align:center;border-radius:10px;padding:7px;font-size:.85em;font-weight:600;border:1px solid var(--line);color:var(--cream);background:var(--card);cursor:pointer}
+.btn.y{background:var(--accent);border-color:var(--accent)}
+.btn.bk{flex:.6;color:var(--mut);font-weight:500}
+.tl{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:4px 0 12px;font-size:.72em}
+.tl label{display:flex;gap:8px;align-items:center;color:var(--mut);flex-wrap:wrap}
+.tl input{background:var(--card);border:1px solid var(--line);color:var(--cream);border-radius:8px;padding:4px 8px;font:inherit;color-scheme:dark}
+.bar{position:relative;height:8px;border-radius:6px;background:var(--line);margin:24px 6px 28px}
+.bar .f{position:absolute;left:0;top:0;bottom:0;width:33%;background:var(--gold);border-radius:6px}
+.bar .m{position:absolute;top:-5px;width:2px;height:18px;background:var(--cream)}
+.bar .m span{position:absolute;top:19px;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--mut);font-size:.95em}
+.bar .m u{position:absolute;top:-17px;left:50%;transform:translateX(-50%);white-space:nowrap;text-decoration:none;color:var(--cream);font-size:.95em}
+.bar .m:last-child u{transform:translateX(-90%)}.bar .m:last-child span{transform:translateX(-90%)}
+.res{background:#0f1f19;border:1px solid #1f4a37;border-radius:12px;padding:10px 12px;margin:2px 0 12px;font-size:.82em;color:#D6F0E2}
+.res b{color:var(--green)}
+.res.end{background:#1d1a10;border-color:#5a4a1e;color:var(--cream)}
+.res.end b{color:var(--gold)}
+.reset{display:inline-block;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:3px 10px;font-size:.9em;color:var(--mut);cursor:pointer}
+.hide{display:none!important}
+.note{background:#1d1a10;border:1px solid #5a4a1e;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:.8em;color:#E6D9AE}
+.note b{color:var(--gold)}
+.recall{background:#0f1f19;border:1px solid #1f4a37;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:.8em;color:#BFE6D0}
+.recall b{display:block;font-size:.8em;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:3px}
+.ex{background:#141b2a;border:1px dashed #2d4a73;border-radius:10px;padding:8px 11px;margin-bottom:10px;font-size:.78em;color:#C9D6EA}
+.ex b{display:block;font-size:.85em;letter-spacing:.1em;text-transform:uppercase;color:#8DB5F0;margin-bottom:3px}
+.flag.ok{background:#16232f;color:var(--mut)}
+.mod .cnt{font-size:.62em;color:var(--mut);margin-left:6px}
+.tl.nodate{display:none}
+.fin{font-size:.78em;color:var(--mut);margin-top:8px}
+.flat{columns:1}@media(min-width:1024px){.flat #rails{columns:2;column-gap:28px}.flat .rail{break-inside:avoid}}
+
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+var MD={};
+var MODS=[
+ {n:1,t:'Scope, definitions, overriding effect',sec:'ss.1-3',arc:'f',tag:'Frame'},
+ {n:3,t:'Registration of marriage',sec:'s.5',arc:'n',tag:'Entering'},
+ {n:4,t:'Polygamy',sec:'s.6',arc:'n',tag:'Entering · Gate'},
+ {n:8,t:'Dower',sec:'s.10',arc:'n',tag:'Entering'},
+ {n:5,t:'Talaq',sec:'s.7',arc:'e',tag:'Ending · Gate (timeline)'},
+ {n:6,t:'Dissolution otherwise than by talaq',sec:'s.8',arc:'e',tag:'Ending'},
+ {n:7,t:'Maintenance',sec:'s.9',arc:'e',tag:'Ending'},
+ {n:2,t:'Succession',sec:'s.4',arc:'e',tag:'Ending'},
+ {n:9,t:'Rules and omitted sections',sec:'ss.11-13',arc:'f',tag:'Frame'}
+];
+
+MD[1]={
+ tag:'Module 1 · ss.1-3 · Frame',
+ title:'Scope, definitions, overriding effect',
+ intro:'Before the rules, the rulebook: who the Ordinance covers, what its four defined words mean, and why it beats custom. Every later section runs through the Chairman and the Arbitration Council, so learn those two first.',
+ recall:'Applies to Muslim citizens, wherever they are (s.1(2)). Two bodies do the work: the <b>Chairman</b> and the <b>Arbitration Council</b> (s.2). Custom and other laws give way (s.3(1)); court procedure laws do not govern the Council (s.3(2)).',
+ rails:[
+ {id:'r1',code:'Preamble s.1(1)',term:'Long title, preamble and short title',sub:'Gives effect to recommendations of the Commission on Marriage and Family Laws',tests:'source and purpose of the Ordinance',
+  hook:'An Ordinance with a pedigree: it is the Commission’s homework turned into law by presidential pen, not by a legislature.',
+  text:'<b>An Ordinance</b> to give effect to certain recommendations of the Commission on Marriage and Family Laws.<br><b>WHEREAS</b> it is expedient to give effect to certain recommendations of the Commission on Marriage and Family Laws; <b>Now, THEREFORE,</b> in pursuance of the Proclamation of the seventh day of October, 1958, and in exercise of all powers enabling him in that behalf, the President is pleased to make and promulgate the following Ordinance:<br><b>1. (1)</b> This Ordinance may be called the Muslim Family Laws Ordinance, 1961.',
+  plain:[['Ordinance','a law made by the President, not passed by a legislature; this one is Ordinance No. VIII of 1961, dated 2 March 1961.'],['Commission on Marriage and Family Laws','the body whose recommendations the Ordinance carries out; its report is the background for the whole text.'],['Proclamation of the seventh day of October, 1958','the instrument the preamble names as the source of the President’s power to legislate.']],
+  links:[['s.1(3) commencement','r3'],['Module 9: amendment history','9:r1']],cases:[],
+  bnd:'<h4>Boundary map: what the preamble tells you</h4><table><tr><th>Question</th><th>Answer in the text</th></tr><tr><td>Who made it?</td><td>the President, by Ordinance</td></tr><tr><td>Why?</td><td>to give effect to “certain” recommendations only, not all of them</td></tr><tr><td>Does it list what the Commission recommended?</td><td>no; the text does not say which recommendations</td></tr></table>'},
+ {id:'r2',code:'s.1(2)',term:'Extent and application',sub:'Whole of Pakistan; all Muslim citizens, wherever they may be',ess:'Muslim citizens of Pakistan',exam:true,
+  hook:'The Ordinance follows the person, not the postcode: a Muslim citizen carries it to Dubai.',
+  text:'<b>(2)</b> It extends to the whole of Pakistan, and applies to all Muslim citizens of Pakistan, wherever they may be.',
+  plain:[['extends to','the territory where the law runs: the whole of Pakistan.'],['applies to','the people it binds: Muslim citizens of Pakistan.'],['wherever they may be','the reach follows the citizen abroad; it is not limited to Pakistani soil.']],
+  ex:'A Pakistani Muslim man living in Dubai pronounces talaq there. Section 1(2) reaches him as a Muslim citizen wherever he is, so s.7 is engaged on its words. How the notice reaches a Chairman from abroad is a question about s.2(b), not s.1(2).',
+  links:[['s.2(b) Chairman','r5'],['s.7(1) notice','5:r1'],['s.3(1) override','r7']],
+  cases:[
+   {n:'Syed Ali Nawaz Gardezi v Lt Col Muhammad Yusuf',c:'Supreme Court of Pakistan, PLD 1963 SC 51',t:'Reported in a secondary article (Islamabad Law Review, 2023) as holding that the Ordinance reaches a marriage between a Pakistani Muslim man and a non-citizen Muslim woman, or even a non-Muslim woman. Holding read second-hand; the report itself was not seen.',v:1,fl:'secondary article'},
+   {n:'Dilshad Bibi v her husband (named Liaqat Ali Mir in some reports, Muzaffar Mir in another)',c:'Islamabad High Court, June 2019, Athar Minallah CJ',t:'Reported as holding that the Ordinance applies throughout Pakistan to Muslim citizens: a husband living in Azad Kashmir who held a national identity card was a citizen, and the registration in Islamabad gave the Islamabad court jurisdiction.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: persons against s.1(2)</h4><table><tr><th>Person</th><th>Reached by the words?</th></tr><tr><td>Muslim citizen in Pakistan</td><td>yes</td></tr><tr><td>Muslim citizen abroad</td><td>yes (“wherever they may be”)</td></tr><tr><td>Muslim citizen living in Azad Kashmir</td><td>yes on the IHC 2019 report (citizenship by identity card)</td></tr><tr><td>Non-Muslim citizen</td><td>no</td></tr><tr><td>Muslim who is not a citizen</td><td>not by the words; but a Pakistani Muslim man marrying a non-citizen woman is within it (Gardezi, as reported)</td></tr><tr><td>Person whose Muslim status is disputed</td><td>the text is silent</td></tr></table><p>Sub-section (2) says nothing about sect. Jafri provisions inserted in 2021 (s.4(2) to (8), s.7 proviso and (1A)) apply to Fiqah-e-Jafria parties, so “Muslim” in s.1(2) covers Shia and Sunni alike.</p>'},
+ {id:'r3',code:'s.1(3)',term:'Commencement',sub:'On a date the Federal Government appoints by Gazette notification',tests:'when the Ordinance began',
+  hook:'Born 2 March 1961, switched on 15 July 1961: four and a half months of waiting in the wings.',
+  text:'<b>(3)</b> It shall come into force on such date as the Federal Government may, by notification in the official Gazette, appoint in this behalf.',
+  plain:[['Federal Government','substituted for “Central Government” by F.A.O. 1975 (printed footnote).'],['notification in the official Gazette','a published government notice; the date itself is not in the text but in a footnote.'],['15 July 1961','the date given in the printed footnote (Gazette of Pakistan, S.R.O. 56 (R), 1961).']],
+  links:[['s.4 succession','2:r1'],['Module 9: amendments','9:r1']],cases:[],
+  bnd:'<h4>Boundary map: dates around the Ordinance (from the printed footnotes)</h4><table><tr><th>Date</th><th>Event</th></tr><tr><td>7 Oct 1958</td><td>Proclamation named in the preamble</td></tr><tr><td>2 Mar 1961</td><td>Ordinance made</td></tr><tr><td>15 Jul 1961</td><td>comes into force (S.R.O. 56 (R))</td></tr><tr><td>1961</td><td>Amending Ordinances XXI and XXX of 1961 (s.2 and s.7(5) wording)</td></tr><tr><td>1964, 1975</td><td>A.O. 1964 and F.A.O. 1975 substitute the authorities named in ss.2(b), 6(4), 9(2), 11</td></tr><tr><td>1981</td><td>ss.12 and 13 omitted (Ordinance XXVII of 1981)</td></tr><tr><td>2021</td><td>Acts XXVIII and XXIX add s.4(2) to (8), the s.7 proviso and s.7(1A)</td></tr><tr><td>10 Mar 2022</td><td>“updated till” date of the bare act used here</td></tr></table><p>Anything after 10-3-2022 is not covered by this build.</p>'},
+ {id:'r4',code:'s.2(a)',term:'“Arbitration Council”',sub:'Chairman plus a representative of each party; the body formed without a defaulting party’s nominee still counts',ess:'Chairman + one representative per party',exam:true,
+  hook:'Three chairs at the table: the Chairman, and one nominee from each side. If one side will not send a nominee, the table is set for two and the meeting goes ahead.',
+  text:'<b>2. Definitions.</b>&mdash;In this Ordinance unless there is anything repugnant in the subject or context,&mdash;<br><b>(a)</b> “Arbitration Council” means a body consisting of the Chairman and a representative of each of the parties to a matter dealt with in this Ordinance:<br><b>Provided</b> that where any party fails to nominate a representative within the prescribed time, the body formed without such representative shall be the Arbitration Council;',
+  plain:[['body','a group, not a court; s.3(2) keeps court procedure laws away from it.'],['representative of each of the parties','one nominee for each side of the matter (husband, wife; for s.6, the applicant and each existing wife).'],['within the prescribed time','a period fixed by rules under s.11 (s.2(c)).'],['the words “of the Union Council”','were omitted after “Chairman” by Ordinance XXI of 1961 (printed footnote).']],
+  ex:'Husband applies under s.6 to marry a second wife. The Chairman asks the husband and the first wife each to nominate a representative. The first wife names no one within the prescribed time. The Council is the Chairman and the husband’s nominee: it is still the Arbitration Council.',
+  links:[['s.2(b) Chairman','r5'],['s.6(3) Council on polygamy','4:r3'],['s.7(4) Council on talaq','5:r6'],['s.9(1) Council on maintenance','7:r1'],['s.3(2) procedure','r8']],cases:[],
+  bnd:'<h4>Boundary map: who sits, by matter</h4><table><tr><th>Matter</th><th>Chairman</th><th>Representatives</th></tr><tr><td>s.6 second marriage</td><td>yes</td><td>applicant and each existing wife (s.6(3))</td></tr><tr><td>s.7 talaq (reconciliation)</td><td>yes</td><td>husband and wife, by s.2(a)</td></tr><tr><td>s.8 delegated or other dissolution</td><td>yes</td><td>as for s.7, mutatis mutandis</td></tr><tr><td>s.9 maintenance</td><td>yes</td><td>wife or wives and husband, by s.2(a)</td></tr><tr><td>A party names no nominee in time</td><td>yes</td><td>body without that representative is still the Council</td></tr></table>'},
+ {id:'r5',code:'s.2(b)',term:'“Chairman”',sub:'Union Council Chairman, or an appointee; a Muslim member is elected if he cannot or should not act',ess:'who discharges the Chairman’s functions',exam:true,
+  hook:'The Chairman is a job, not a person: whoever is lawfully filling it does the Chairman’s work for this Ordinance.',
+  text:'<b>(b)</b> ‘Chairman’ means the Chairman of the Union Council or a person appointed by the Federal Government in the Cantonment areas, or by the Provincial Government in other areas, or by an officer authorized in that behalf by any such Government, to discharge the functions of Chairman under this Ordinance:<br><b>Provided</b> that where the Chairman of the Union Council is a non-Muslim, or he himself wishes to make an application to the Arbitration Council, or is, owing to illness or any other reason, unable to discharge the functions of Chairman, the Council shall elect one of its Muslim members as Chairman for the purposes of this Ordinance;',
+  plain:[['Union Council','see s.2(d): the Union Council or the Town or Union Committee under the Basic Democracies Order, 1959.'],['Cantonment areas','the Federal Government appoints the Chairman there; elsewhere the Provincial Government (or an officer it authorizes).'],['the Council shall elect','here “the Council” is the Union Council electing one of its own Muslim members, not the Arbitration Council.'],['he himself wishes to make an application','a Chairman who is a party himself steps aside for that matter.']],
+  links:[['s.2(a) Arbitration Council','r4'],['s.2(d) Union Council','r6'],['s.7(4) Chairman’s thirty days','5:r6']],cases:[],
+  bnd:'<h4>Boundary map: who acts as Chairman</h4><table><tr><th>Situation</th><th>Who acts</th></tr><tr><td>Ordinary case, Union Council area</td><td>Chairman of the Union Council</td></tr><tr><td>Cantonment area</td><td>person appointed by the Federal Government (or its authorized officer)</td></tr><tr><td>Other area</td><td>person appointed by the Provincial Government (or its authorized officer)</td></tr><tr><td>Chairman is non-Muslim</td><td>the Union Council elects one of its Muslim members</td></tr><tr><td>Chairman wishes to apply himself</td><td>same: a Muslim member is elected</td></tr><tr><td>Chairman ill or otherwise unable</td><td>same: a Muslim member is elected</td></tr></table><p>The text does not say what happens if no Muslim member exists. Not answered; open to argument.</p>'},
+ {id:'r6',code:'s.2(c)-(e)',term:'“Prescribed”, “Union Council”, “Ward”',sub:'Three short definitions that point to rules and the Basic Democracies Order',tests:'meaning of prescribed, Union Council and Ward',
+  hook:'Three small dictionary entries, each one a signpost to somewhere else: rules, an Order, an Order.',
+  text:'<b>(c)</b> “Prescribed” means prescribed by rules made under section 11;<br><b>(d)</b> “Union Council” means the Union Council or the Town or Union Committee constituted under the Basic Democracies Order, 1959, and having in the matter jurisdiction as prescribed;<br><b>(e)</b> “Ward” means a ward within a Union or Town as defined in the aforesaid Order.',
+  plain:[['prescribed','fixed by rules under s.11, so every “prescribed” fee, form and period is found in the Rules, not in the Ordinance.'],['Basic Democracies Order, 1959','the 1959 local-government scheme the Ordinance was built on; the Ordinance still refers to it by name.'],['having in the matter jurisdiction as prescribed','the Union Council that has jurisdiction over the matter as the rules say (wording substituted by Ordinance XXI of 1961).'],['Ward','a ward inside a Union or Town; s.5(2) allows one Nikah Registrar per Ward.']],
+  links:[['s.11 rules','9:r1'],['s.5(2) one Registrar per Ward','3:r2'],['s.2(b) Chairman','r5']],cases:[],
+  bnd:'<h4>Boundary map: what is left to the Rules</h4><table><tr><th>Provision</th><th>Left to “prescribed”</th></tr><tr><td>s.2(a) proviso</td><td>time to nominate a representative</td></tr><tr><td>s.5(5)</td><td>nikah nama form, registers, records, manner, fees</td></tr><tr><td>s.6(2), (4)</td><td>manner and fee of the application; manner, period and fee of revision</td></tr><tr><td>s.9(2)</td><td>manner, period and fee of revision</td></tr></table>'},
+ {id:'r7',code:'s.3(1)',term:'Overriding effect',sub:'Notwithstanding any law, custom or usage; registration only in accordance with the Ordinance',ess:'notwithstanding any law, custom or usage',exam:true,
+  hook:'When the Ordinance and custom collide, custom is the one that moves aside.',
+  text:'<b>3. Ordinance to override other laws, etc.</b>&mdash;<b>(1)</b> The provisions of this Ordinance shall have effect notwithstanding any law, custom or usage, and the registration of Muslim marriages shall take place only in accordance with those provisions.',
+  plain:[['notwithstanding','despite; where another law or custom says otherwise, this Ordinance wins.'],['custom or usage','long-practised community habit; it cannot displace the Ordinance.'],['only in accordance with those provisions','a Muslim marriage can be registered in no other way than the one the Ordinance sets out.']],
+  ex:'A community custom says a marriage needs no paper and no report. Section 3(1) says the Ordinance applies regardless, so s.5 still requires registration. The nikah itself may still be valid unregistered (see Module 3): the override is about the duty to register, not about the validity of the marriage.',
+  links:[['s.5(1) registration','3:r1'],['s.3(2) procedure','r8'],['s.1(2) reach','r2']],cases:[],
+  bnd:'<h4>Boundary map: what yields to s.3(1)</h4><table><tr><th>Competing source</th><th>Result</th></tr><tr><td>Any other law</td><td>Ordinance prevails (to the extent of conflict)</td></tr><tr><td>Custom</td><td>Ordinance prevails</td></tr><tr><td>Usage</td><td>Ordinance prevails</td></tr><tr><td>Another way of registering a Muslim marriage</td><td>not allowed: only the Ordinance’s way</td></tr></table><p>Whether a provincial registration law (such as Sindh’s 1995 Act) sits alongside the Ordinance after the 18th Amendment is outside the text and not checked here.</p>'},
+ {id:'r8',code:'s.3(2)',term:'Court procedure laws do not govern the Arbitration Council',sub:'Arbitration Act 1940, Code of Civil Procedure 1908 and other procedural laws are shut out',ess:'no court-procedure law applies',exam:true,
+  hook:'The Council is a conversation with teeth, not a mini-trial: no pleadings, no CPC.',
+  text:'<b>(2)</b> For the removal of doubt, it is hereby declared that the provisions of the Arbitration Act, 1940 (X of 1940), the Code of Civil Procedure 1908 (Act V of 1908), and any other law regulating the procedure of courts shall not apply to any Arbitration Council.',
+  plain:[['for the removal of doubt','a clarification: the drafter is stating what he believes is already so.'],['Arbitration Act, 1940','the general arbitration statute; not applied to the Arbitration Council.'],['any other law regulating the procedure of courts','a catch-all; includes court procedure laws beyond the two named.']],
+  ex:'A wife in a s.9 maintenance matter asks the Arbitration Council to issue notices under Order V of the CPC. By s.3(2) the CPC does not apply to the Council: it follows the Ordinance and the Rules, not the CPC.',
+  links:[['s.7(1) proviso (c): Mujtahid-e-Alam’s award','5:r2'],['s.4(7) Mujtahid-e-Alam','2:r7'],['s.2(a) Council','r4']],cases:[],
+  bnd:'<h4>Boundary map: which procedure applies to which body</h4><table><tr><th>Body</th><th>Arbitration Act 1940</th><th>CPC / court procedure</th></tr><tr><td>Arbitration Council (s.2(a))</td><td>no (s.3(2))</td><td>no (s.3(2))</td></tr><tr><td>Mujtahid-e-Alam’s decision (s.4(7), s.7 proviso (c))</td><td>yes: has the status of an award dealt with under the Act</td><td>text silent</td></tr><tr><td>A court of competent jurisdiction</td><td>not relevant</td><td>its own procedure</td></tr></table><p>The contrast is the point: the same Ordinance shuts the Arbitration Act out for the Council (s.3(2)) and brings it in for the Mujtahid-e-Alam (ss.4(7), 7 proviso (c)).</p>'}
+ ],
+ spar:[
+  {q:'A Muslim citizen of Pakistan, settled in Dubai, pronounces talaq there. Is the Ordinance engaged, and which definition decides who receives his notice?',a:'Yes on the words of s.1(2): it applies to Muslim citizens “wherever they may be”. Who acts as Chairman is a question for s.2(b): the Union Council Chairman, or a person appointed by the Federal Government (Cantonment areas) or the Provincial Government (other areas). The text does not speak of overseas missions; not checked.'},
+  {q:'Cross-module: a village custom says nikah needs no report to anyone. Does the custom beat s.5, and does non-registration make the marriage void?',a:'The custom does not beat s.5: s.3(1) says the Ordinance has effect notwithstanding custom or usage. Whether the marriage is void is a different question: the Federal Shariat Court in Arif Hussain v The State (PLD 1982 FSC 42) is reported as holding that non-registration does not invalidate an otherwise valid nikah; the penalty is in s.5(4). See Module 3.'},
+  {q:'The Arbitration Council and a Mujtahid-e-Alam both decide disputes under this Ordinance. Which procedural law applies to each?',a:'Arbitration Council: neither the Arbitration Act 1940 nor the CPC (s.3(2)). Mujtahid-e-Alam: his decision has the status of an award and is dealt with under the Arbitration Act 1940 (s.4(7); s.7 proviso (c)). Same statute, opposite answers.'},
+  {q:'Cross-section: the Union Council Chairman himself wants to take a second wife and applies under s.6. Who acts as Chairman for his own application, and would the answer change if he were a non-Muslim?',a:'Under the s.2(b) proviso, where the Chairman “himself wishes to make an application to the Arbitration Council”, the Union Council elects one of its Muslim members as Chairman for the purposes of the Ordinance. The same proviso applies where the Chairman is a non-Muslim or is unable to act, so the answer on who acts is the same. The text does not say what follows if the Union Council has no Muslim member; not answered.'}
+ ]
+};
+
+MD[2]={
+ tag:'Module 2 · s.4 · Accordion',
+ title:'Succession',
+ intro:'Section 4 started as one sentence rescuing orphaned grandchildren (1961) and grew in 2021 into eight sub-sections that also cover widows and Jafri husbands. Read (1) first, then the 2021 block, (2) to (8).',
+ note:'<b>Two layers.</b> Sub-section (1) is the 1961 text. Sub-sections (2) to (8) were added by Act XXVIII of 2021 (printed footnote). Source typos are kept as printed: “per stripes” for per stirpes, and “Ahl-e-Teshih” in (2) against “Ahl-e-Tashih” in (8).',
+ recall:'Predeceased child&rsquo;s children take the parent&rsquo;s share (1). 2021 block: widow 1/4 or 1/8 (2), split among widows (3), value at payment day (4), movable property too (5), Jafri husband 1/2 or 1/4 (6), disputes to court or Mujtahid-e-Alam (7), Jafri law governs Ahl-e-Tashih (8).',
+ rails:[
+ {id:'r1',code:'s.4(1)',term:'Orphaned grandchildren take their parent’s share',sub:'Per stirpes; only children living when the succession opens',ess:'predeceased son or daughter; children living at the opening; per stirpes',exam:true,
+  hook:'A father who died too early still has a seat at the table: his children sit in it, together.',
+  text:'<b>4. Succession.</b>&mdash;<b>(1)</b> In the event of the death of any son or daughter of the propositus before the opening of succession, the children of such son or daughter, if any, living at the time the succession opens, shall per stripes receive a share equivalent to the share which such son or daughter, as the case may be, would have received if alive.',
+  plain:[['propositus','the person whose estate is being divided, the deceased owner.'],['opening of succession','the moment of the propositus’s death, when the heirs’ rights arise.'],['per stirpes (printed “per stripes”)','by branch: the children of one predeceased child share that child’s one portion between them.'],['living at the time the succession opens','only grandchildren alive at the propositus’s death qualify.'],['share … would have received if alive','the grandchildren take what their parent would have taken; the section sets no new fraction.']],
+  ex:'Propositus P dies leaving an estate of Rs 120. Heirs: son A, daughter E, and two children C and D of son B, who died before P. Had B lived, the shares would be A 48, B 48, E 24 (sons double a daughter). Under s.4(1), C and D take B’s Rs 48 between them. How C and D divide the 48 is not stated in s.4 and falls to the general law.',
+  links:[['s.4(8) Jafri law','r8'],['s.1(3) commencement','1:r3'],['Module 9: omitted and related','9:r1']],
+  cases:[
+   {n:'Allah Rakha and others v Federation of Pakistan',c:'Federal Shariat Court, PLD 2000 FSC 1',t:'Held s.4 repugnant to the Injunctions of Islam, with effect from 31 March 2000 as read in a Sindh High Court judgment; the same judgment is reported to have held the restriction on polygamy in s.6 within the Injunctions. Appeal to the Shariat Appellate Bench: a March 2022 news report says it was still pending and that an appeal stays the FSC decision under the proviso to Article 203D(2). Whether it has since been decided was not re-checked.',v:1,fl:'news and court report'},
+   {n:'Great-grandchildren case (propositus Mrs Tameez un Nisa; title not given in the report)',c:'Supreme Court of Pakistan, reported 3 March 2022; three-judge bench led by CJP Umar Ata Bandial, judgment by Munib Akhtar J',t:'Held that s.4 does not reach great-grandchildren: it covers only grandchildren alive when the succession opens, and the words “living at the time the succession opens” cannot be read away.',v:1,fl:'news report'},
+   {n:'Legal heirs of Javed Iqbal Rana (title not given in the report)',c:'Federal Constitutional Court of Pakistan, 24 September 2026; Amin-ud-Din Khan CJ and Ali Baqar Najafi J',t:'Held that s.4 does not extend to the children of a predeceased brother: it covers only the category it names. Petition dismissed and the Lahore High Court order of 18 March 2026 upheld. Any claim under general Muslim law is for separate assessment.',v:1,fl:'news report'},
+   {n:'Mst. Farishta v Federation of Pakistan; Federation of Pakistan v Mst. Farishta',c:'Peshawar High Court Shariat Bench PLD 1980 Pesh 47; Supreme Court Shariat Bench PLD 1981 SC 120',t:'The Peshawar Shariat Bench held s.4 repugnant to Islam; the Supreme Court reversed on jurisdiction, treating the Ordinance as “Muslim Personal Law” outside the Federal Shariat Court. Read in a LUMS Law Journal article and a Sindh High Court judgment; the reports themselves were not seen.',v:1,fl:'secondary'},
+   {n:'Zainab v Kamal Khan',c:'Supreme Court, PLD 1990 SC 1051',t:'Cited in a Sindh High Court judgment as a Supreme Court decision on the interpretation of s.4. The holding was not read; shown as a pointer only.',v:2}
+  ],
+  bnd:'<h4>Boundary map: whose child, which generation, when</h4><table><tr><th>Facts</th><th>s.4(1)?</th></tr><tr><td>Child of the propositus alive at the opening</td><td>not needed: ordinary heir</td></tr><tr><td>Child of the propositus died before the opening; a child of that child is alive at the opening</td><td>yes: that grandchild takes the parent’s share</td></tr><tr><td>Same, but the grandchild also died before the opening; a great-grandchild is alive</td><td>no (Supreme Court 2022, as reported)</td></tr><tr><td>Child of the propositus’s predeceased brother (nephew)</td><td>no (FCCP Sept 2026, as reported)</td></tr><tr><td>Child of the propositus died after the opening</td><td>no: the child was already an heir; the share passes through the child’s own estate</td></tr><tr><td>Predeceased child left no children</td><td>nothing to take</td></tr><tr><td>Grandchild born after the opening</td><td>not “living at the time”; the text does not address a child in the womb</td></tr><tr><td>Succession opened before 15 July 1961</td><td>not engaged on the reasoning of a Sindh High Court judgment read in part; section applies forward</td></tr></table>'},
+ {id:'r2',code:'s.4(2)',term:'Widow’s share in immovable property (Ahl-e-Teshih)',sub:'One-fourth if no child; one-eighth if there is a child',ess:'Muslim male of Ahl-e-Teshih; immovable property; 1/4 or 1/8',exam:true,
+  hook:'Two numbers to remember, and one switch between them: a child in the picture turns one-fourth into one-eighth.',
+  text:'<b>(2)</b> If a Muslim male from Ahl-e-Teshih dies, the share of a widow in the immovable property left behind by her deceased husband shall be as follows:&mdash;<br><b>(a)</b> one-fourth share of the fixed price or value of the property, if there is no child left behind the deceased husband; and<br><b>(b)</b> one-eighth share, if there is child left behind.',
+  plain:[['Ahl-e-Teshih','printed so in (2); (8) prints “Ahl-e-Tashih” and ties it to Fiqah-e-Jafria (Shia). The two are read as the same group.'],['immovable property','land, buildings and the like; movable property is dealt with in (5).'],['fixed price or value','the widow receives a fraction of the property’s money value, not necessarily the property itself (see (4)).'],['child left behind','a child of the deceased husband; the text does not say whether the child must be the widow’s own.']],
+  ex:'A Shia husband dies leaving one widow, no child, and a house valued at Rs 800. Her share is one-fourth of the value: Rs 200. If he had left a child, one-eighth: Rs 100.',
+  links:[['s.4(3) two or more widows','r3'],['s.4(4) valuation','r4'],['s.4(5) movable property','r5'],['s.4(8) Jafri law','r8']],cases:[],
+  bnd:'<h4>Boundary map: the widow’s fraction in immovable property</h4><table><tr><th>Facts</th><th>Widow’s share</th></tr><tr><td>No child left behind</td><td>1/4 of the fixed price or value</td></tr><tr><td>A child left behind</td><td>1/8</td></tr><tr><td>Two or more widows</td><td>that fraction is divided equally among them (s.4(3))</td></tr><tr><td>Husband not of Ahl-e-Teshih</td><td>sub-section (2) is not engaged on its words</td></tr><tr><td>Child is from another wife</td><td>text silent; “child left behind the deceased husband” is not limited to her own child</td></tr></table><p>Background: a 2019 Dawn report described the proposal as protecting childless Shia widows’ right to one-fourth of the estate; secondary source.</p>'},
+ {id:'r3',code:'s.4(3)',term:'Two or more widows share equally',sub:'The sub-section (2) fraction is divided, not multiplied',ess:'divided equally',
+  hook:'The pie does not grow with the number of widows; the slices get thinner.',
+  text:'<b>(3)</b> If there are two or more widows, the share, as mentioned in sub-section (2), shall be divided equally among them.',
+  plain:[['the share, as mentioned in sub-section (2)','the single 1/4 or 1/8 fraction, not a fraction per widow.'],['divided equally','each widow takes the same part of that fraction.']],
+  ex:'The Rs 800 house: no child, two widows. Total widows’ share 1/4 of 800 = Rs 200; each widow takes Rs 100. With a child: 1/8 of 800 = Rs 100; each takes Rs 50.',
+  links:[['s.4(2)','r2'],['s.4(5): applies to movables too','r5']],cases:[],
+  bnd:'<h4>Boundary map: number of widows</h4><table><tr><th>Widows</th><th>Total share (no child)</th><th>Each widow</th></tr><tr><td>1</td><td>1/4</td><td>1/4</td></tr><tr><td>2</td><td>1/4</td><td>1/8</td></tr><tr><td>3</td><td>1/4</td><td>1/12</td></tr><tr><td>4</td><td>1/4</td><td>1/16</td></tr></table><p>With a child, replace 1/4 by 1/8 throughout. Compare s.6: the Ordinance fixes no ceiling on the number of wives; the table shows the arithmetic only.</p>'},
+ {id:'r4',code:'s.4(4)',term:'Value is fixed at payment, not at death',sub:'If heirs do not pay, the widow takes her share in the corpus of the immovable property',ess:'value at the time of payment; corpus if unpaid',exam:true,
+  hook:'The clock for the price is the day you pay, not the day he died.',
+  text:'<b>(4)</b> The price or value of the property shall be the price or value existing at the time of payment and not the price or value which existed at the time of death of the husband:<br><b>Provided</b> that if the legal heirs of the deceased do not give the widow her share in the above terms, she shall become entitled to her due share in the corpus of immovable property.',
+  plain:[['time of payment','the day the heirs actually pay her; the value on that day counts.'],['not … at the time of death','a rising market after death helps the widow, not the heirs.'],['corpus','the property itself, as against its money value.'],['do not give the widow her share in the above terms','a failure to pay on the s.4(2) to (4) terms triggers the proviso.']],
+  ex:'The house was worth Rs 800 at the husband’s death and Rs 1,200 when the heirs pay. One widow, no child: 1/4 of Rs 1,200 = Rs 300, not Rs 200. If the heirs do not pay, she holds a 1/4 share in the house itself.',
+  links:[['s.4(2)','r2'],['s.4(5)','r5']],cases:[],
+  bnd:'<h4>Boundary map: time points and the widow’s remedy</h4><table><tr><th>Point</th><th>Position</th></tr><tr><td>Death of husband</td><td>succession opens; value at this date is not the measure</td></tr><tr><td>Heirs pay the share</td><td>value on the day of payment is the measure</td></tr><tr><td>Heirs do not pay</td><td>proviso: widow is entitled to her due share in the corpus</td></tr><tr><td>How long the heirs may take before it counts as “do not give”</td><td>text silent; open to argument</td></tr></table>'},
+ {id:'r5',code:'s.4(5)',term:'Movable property too',sub:'Widow’s share in the corpus; (2) and (3) apply mutatis mutandis',ess:'corpus of movable property',
+  hook:'The same fractions follow the cash, the jewellery and the car.',
+  text:'<b>(5)</b> A widow is entitled to her share in the corpus of movable property of her deceased husband provided that the provisions of sub-sections (2) and (3) shall mutatis mutandis apply.',
+  plain:[['corpus of movable property','the movables themselves (cash, vehicles, jewellery and the like), not just a money value.'],['mutatis mutandis','with the necessary changes: the same fractions and the equal split among widows apply to movables.']],
+  links:[['s.4(2)','r2'],['s.4(3)','r3'],['s.4(4) immovables: value or corpus','r4']],cases:[],
+  bnd:'<h4>Boundary map: property type against remedy</h4><table><tr><th>Property</th><th>Sub-section</th><th>What the widow gets</th></tr><tr><td>Immovable</td><td>(2), (4)</td><td>fraction of value at payment; corpus if unpaid</td></tr><tr><td>Movable</td><td>(5)</td><td>fraction of the corpus itself</td></tr><tr><td>Mixed estate</td><td>(2) and (5)</td><td>each part by its own rule; text silent on combining them</td></tr></table>'},
+ {id:'r6',code:'s.4(6)',term:'Jafri husband’s share in his deceased wife’s property',sub:'One-half if no child; one-fourth if there is a child',ess:'movable or immovable; 1/2 or 1/4',exam:true,
+  hook:'The mirror image of the widow’s share, and much bigger: half without a child, a quarter with one.',
+  text:'<b>(6)</b> Fiqah-e-Jafri recognizes right of a husband to get his share from the property left by his deceased wife, either movable or immovable, as follows:&mdash;<br><b>(a)</b> one-half share, if there is no child left behind; and<br><b>(b)</b> one-fourth share of the property, if there is child left behind.',
+  plain:[['Fiqah-e-Jafri','the Jafri (Shia) school; the sub-section states what that school “recognizes” and gives the husband those shares.'],['either movable or immovable','both kinds of property, with no separate rule for each.'],['child left behind','a child of the deceased wife.']],
+  ex:'A Shia wife dies leaving Rs 400 of property and no child. Her husband’s share: one-half = Rs 200. With a child: one-fourth = Rs 100.',
+  links:[['s.4(2) widow’s share','r2'],['s.4(8)','r8']],cases:[],
+  bnd:'<h4>Boundary map: spouse against spouse</h4><table><tr><th>Survivor</th><th>No child</th><th>Child left</th></tr><tr><td>Widow (immovable, s.4(2))</td><td>1/4</td><td>1/8</td></tr><tr><td>Widow (movable, s.4(5))</td><td>1/4</td><td>1/8</td></tr><tr><td>Jafri husband (s.4(6))</td><td>1/2</td><td>1/4</td></tr></table><p>The widow’s share in (2) is expressed as a share of the “price or value”, and in (4) and (5) as a share in the corpus; the husband’s share in (6) is simply a “share of the property”. The text does not say whether the husband’s share is likewise measured at the date of payment.</p>'},
+ {id:'r7',code:'s.4(7)',term:'Disputes: court or Mujtahid-e-Alam',sub:'His decision has the status of an award under the Arbitration Act, 1940',ess:'court, or Mujtahid-e-Alam; status of an award',exam:true,
+  hook:'Two doors: the courthouse, or a senior Shia jurist whose word is treated like an arbitrator’s award.',
+  text:'<b>(7)</b> In case of dispute, the parties or any of the parties may have recourse to a court of competent jurisdiction or by approaching the Mujtahid-e-Alam from the panel maintained by the Council of Islamic Ideology. The decision of Mujtahid-e-Alam shall have a status of an award and the same shall be dealt with in accordance with the provisions of the Arbitration Act, 1940 (X of 1940).<br><b>Explanation.</b>&mdash;The expression “Mujtahid-e-Alam (Faqih-e-Azam)” means a juris-consult, religious scholar or doctor of Shia school of thought well versed with Shariah having international repute and of such recognition. The Council of Islamic Ideology shall maintain a panel of Mujtahid-e-Alam having aforesaid qualifications.',
+  plain:[['the parties or any of the parties','either side may start it; consent of the other is not stated as a condition.'],['court of competent jurisdiction','the ordinary court with power over the matter; which court is not named.'],['status of an award','treated like an arbitrator’s decision and handled under the Arbitration Act, 1940.'],['panel maintained by the Council of Islamic Ideology','the Mujtahid-e-Alam is chosen from this panel.']],
+  links:[['s.7 proviso (c): same mechanism','5:r2'],['s.3(2): Arbitration Act kept away from the Council','1:r8']],cases:[],
+  bnd:'<h4>Boundary map: the two forums</h4><table><tr><th>Forum</th><th>Procedural law</th><th>Outcome</th></tr><tr><td>Court of competent jurisdiction</td><td>its own procedure</td><td>judgment or decree</td></tr><tr><td>Mujtahid-e-Alam</td><td>Arbitration Act, 1940</td><td>decision with the status of an award</td></tr><tr><td>Arbitration Council</td><td>not a forum under s.4</td><td>not applicable</td></tr></table>'},
+ {id:'r8',code:'s.4(8)',term:'Jafri personal law decides Ahl-e-Tashih inheritance',sub:'Article 227, as the text itself recites',tests:'which personal law decides',
+  hook:'The sub-section that hands Shia inheritance to Shia law, citing the Constitution as its warrant.',
+  text:'<b>(8)</b> As enshrined in Article 227 of the Constitution of the Islamic Republic of Pakistan, the inheritance rights of Ahl-e-Tashih and matters connected therewith or ancillary thereto shall be decided according to their personal law interpreted by Fiqah-e-Jafria (Shia school of thought).]',
+  plain:[['Article 227','the Constitution provision the sub-section itself relies on; its text was not read in this build.'],['matters connected therewith or ancillary thereto','things that follow from the inheritance rights, such as how shares are measured and paid.'],['their personal law … Fiqah-e-Jafria','Jafri law governs the inheritance rights of this group.']],
+  links:[['s.4(1)','r1'],['s.4(2)','r2'],['s.7(1A): the same device for divorce','5:r3']],cases:[],
+  bnd:'<h4>Boundary map: which sub-section governs a Shia estate</h4><table><tr><th>Question</th><th>Answer</th></tr><tr><td>Widow’s share (immovable, movable)</td><td>(2) to (5)</td></tr><tr><td>Husband’s share from the wife</td><td>(6)</td></tr><tr><td>Dispute</td><td>court or Mujtahid-e-Alam (7)</td></tr><tr><td>Other inheritance rights of Ahl-e-Tashih</td><td>Jafri law (8)</td></tr><tr><td>Orphaned grandchild in a Shia family: (1) or (8)?</td><td>the text does not say whether (8) displaces (1); open to argument; not checked</td></tr></table>'}
+ ],
+ spar:[
+  {q:'Propositus P’s son B dies before P. B’s son C also dies before P, leaving a child G who is alive when P dies. Does G take B’s share under s.4(1)?',a:'On the Supreme Court’s March 2022 ruling as reported, no: s.4 covers children of the predeceased son or daughter who are “living at the time the succession opens”, and does not reach great-grandchildren. C is a grandchild but died before the opening, and G is a great-grandchild. Reported from news; the judgment text was not seen.'},
+  {q:'A Shia husband dies without children. His two widows survive. A house was worth Rs 800 at his death and Rs 1,200 on the day the heirs pay. What does each widow receive?',a:'One-fourth of the value at the time of payment (s.4(2)(a), (4)): 1/4 of Rs 1,200 = Rs 300 in total, divided equally between two widows (s.4(3)): Rs 150 each. If the heirs do not pay, each is entitled to her due share in the corpus of the house (s.4(4) proviso).'},
+  {q:'Cross-module: how do the widow’s s.4(2) share and an unpaid dower under s.10 interact?',a:'The text of s.4 does not mention dower. Section 10 only fixes the mode of payment where the nikah nama is silent. Whether an unpaid dower is a debt on the husband’s estate before the widow’s share is calculated is a question of general Muslim law, outside the Ordinance, and is not answered here.'},
+  {q:'Cross-module: ss.4(7) and 7 proviso (c) both send disputes to a Mujtahid-e-Alam, while s.3(2) shuts the Arbitration Act out for the Arbitration Council. What explains the difference?',a:'The Arbitration Council is a statutory conciliation body formed under s.2(a); s.3(2) keeps court procedure laws away from it. The Mujtahid-e-Alam is an alternative decision-maker for Jafri disputes, whose decision “shall have a status of an award” and so is dealt with under the Arbitration Act, 1940. The Ordinance borrows the Act deliberately for one and excludes it for the other.'},
+  {q:'Cross-section: a Shia family has a son who died before his father. Do you apply s.4(1) or s.4(8) to the son’s children?',a:'The text does not say. Sub-section (1) speaks of any son or daughter of the propositus; sub-section (8) assigns the inheritance rights of Ahl-e-Tashih to Jafri law. Whether (8) displaces (1) for Shia families is open to argument and is not checked against case law.'}
+ ]
+};
+
+MD[3]={
+ tag:'Module 3 · s.5 · Accordion',
+ title:'Registration of marriage',
+ intro:'Section 5 puts every Muslim marriage on paper. Three actors: the Union Council that licenses Nikah Registrars, the Registrar or other person who solemnizes, and the public who may inspect the record. One offence, one cross-reference to the Rules.',
+ recall:'Every marriage is registered (1). One licensed Registrar per Ward at most (2). If someone else solemnizes, that person reports it to the Registrar (3). Failing to report: up to 3 months or Rs 1,000 (4). Form, registers and fees are left to the Rules (5). Anyone may inspect or copy the record (6).',
+ rails:[
+ {id:'r1',code:'s.5(1)',term:'Every marriage must be registered',sub:'The duty is on the marriage; non-registration does not by itself undo it',ess:'every marriage solemnized under Muslim Law',exam:true,
+  hook:'A nikah is made in the room, but the Ordinance wants it written down in the register.',
+  text:'<b>5. Registration of marriages.</b>&mdash;<b>(1)</b> Every marriage solemnized under Muslim Law shall be registered in accordance with the provisions of this Ordinance.',
+  plain:[['solemnized under Muslim Law','performed by a valid Muslim-law nikah; the Ordinance registers marriages, it does not create them.'],['shall be registered','a duty, not an option.'],['in accordance with the provisions of this Ordinance','through the Nikah Registrar and the Union Council record (ss.5(2) to (5)); s.3(1) says registration may take place only this way.']],
+  ex:'A couple marry before witnesses, with proper offer and acceptance, and nobody reports it. The nikah is not void for that reason; the person who solemnized it has broken s.5(3) and is exposed to s.5(4).',
+  links:[['s.3(1) registration only under the Ordinance','1:r7'],['s.5(3) report','r3'],['s.5(4) penalty','r4'],['s.6(1): unpermitted second marriage not registered','4:r1']],
+  cases:[
+   {n:'Arif Hussain and Azra Parveen v The State',c:'Federal Shariat Court, PLD 1982 FSC 42',t:'Reported as holding that registration is not an essential condition for a valid nikah and that the Ordinance does not make an unregistered nikah invalid. A 2023 Islamabad Law Review article criticises its reasoning on proof of the marriage but accepts the general rule that non-registration attracts the s.5(4) penalty and does not by itself invalidate the marriage.',v:1,fl:'secondary article'}
+  ],
+  bnd:'<h4>Boundary map: validity against registration</h4><table><tr><th>Nikah</th><th>Registered?</th><th>Position</th></tr><tr><td>Valid</td><td>yes</td><td>compliant; Family Courts Act s.23 (by its printed heading) stops Family Courts questioning the validity of a registered marriage</td></tr><tr><td>Valid</td><td>no</td><td>marriage stands; the solemnizer who did not report is exposed to s.5(4)</td></tr><tr><td>Not valid under Muslim law</td><td>yes</td><td>registration does not create a marriage; but see the s.23 bar on Family Courts</td></tr><tr><td>Not valid</td><td>no</td><td>no marriage and nothing to register</td></tr><tr><td>Solemnized before 15 July 1961</td><td>either</td><td>text silent on past marriages; not checked</td></tr></table>'},
+ {id:'r2',code:'s.5(2)',term:'Nikah Registrars: licensed by the Union Council, one per Ward',sub:'One or more persons may be licensed, but never more than one for any Ward',ess:'licence by the Union Council; at most one per Ward',exam:true,
+  hook:'One ward, one registrar: the Ordinance does not let two scribes keep the same book.',
+  text:'<b>(2)</b> For the purpose of registration of marriages under this Ordinance, the Union Council shall grant licences to one or more persons, to be called Nikah Registrars, but in no case shall more than on Nikah Registrar be licensed for any one Ward.',
+  plain:[['Union Council','the local body in s.2(d); it, not the Provincial Government, grants the licence.'],['licences','a licence is a permission with conditions; a registrar who breaches it risks losing it.'],['more than on Nikah Registrar','printed so in the bare act (for “one”); read as “one”.'],['Ward','a ward within a Union or Town (s.2(e)).']],
+  links:[['s.2(d), (e) Union Council, Ward','1:r6'],['s.5(5) records','r5']],
+  cases:[
+   {n:'Supreme Court on the role of Nikah Registrars (title not given in the reports)',c:'Supreme Court of Pakistan, reported 27 June 2025',t:'Reported as stressing that Registrars licensed under s.5(2) have the most important role in ensuring that the entries in the Nikahnama reflect the parties’ intention; the court asked the government to simplify the Nikahnama and to ensure that Registrars are qualified and of integrity.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: Registrars per Ward</h4><table><tr><th>Number licensed for a Ward</th><th>Under s.5(2)</th></tr><tr><td>0</td><td>not forbidden by the words, but the Ward would have no Registrar</td></tr><tr><td>1</td><td>allowed</td></tr><tr><td>2 or more</td><td>forbidden: “in no case”</td></tr></table><p>The limit is per Ward, not per Union Council: a Union with several Wards may have several Registrars, one for each. The text does not say whether one person may hold licences for two Wards.</p>'},
+ {id:'r3',code:'s.5(3)',term:'Marriage not solemnized by the Registrar must be reported to him',sub:'The duty falls on the person who solemnized the marriage',ess:'reported to the Nikah Registrar; by the person who solemnized',exam:true,
+  hook:'If the imam performs the nikah, the imam carries the paper.',
+  text:'<b>(3)</b> Every marriage not solemnized by the Nikah Registrar shall, for the purpose of registration under this Ordinance, be reported to him by the person who has solemnized such marriage.',
+  plain:[['not solemnized by the Nikah Registrar','another person (a cleric, a relative, an elder) performed the nikah.'],['reported to him','told to the Nikah Registrar so he can register it; the text sets no number of days.'],['the person who has solemnized','the person bound is the solemnizer, not the bride or groom.']],
+  ex:'A cleric performs a nikah in a village hall. Under s.5(3) it is the cleric, not the couple, who must report it to the Registrar. If he does not, s.5(4) bites on him.',
+  links:[['s.5(4) penalty','r4'],['s.5(2) Registrar','r2']],cases:[],
+  bnd:'<h4>Boundary map: who solemnizes, who acts</h4><table><tr><th>Who solemnized</th><th>Who registers or reports</th></tr><tr><td>Nikah Registrar</td><td>the Registrar registers it (he is the Registrar)</td></tr><tr><td>Any other person</td><td>that person reports it to the Registrar (s.5(3))</td></tr><tr><td>Nobody reports</td><td>the solemnizer is exposed to s.5(4); the marriage itself is not undone on that ground alone</td></tr></table><p>The text does not say what the couple can do if the solemnizer will not report. Not answered.</p>'},
+ {id:'r4',code:'s.5(4)',term:'Penalty for not reporting',sub:'Simple imprisonment up to three months, or fine up to Rs 1,000, or both',ess:'contravention of sub-section (3); up to 3 months or Rs 1,000',exam:true,
+  hook:'A short sentence for a short omission: three months, a thousand rupees, or both.',
+  text:'<b>(4)</b> Whoever contravenes the provisions of sub-section (3) shall be punishable with simple imprisonment for a term which may extent to three months, or with fine which may extend to one thousand rupees, or with both.',
+  plain:[['contravenes the provisions of sub-section (3)','fails to report a marriage he solemnized to the Registrar.'],['simple imprisonment','the lighter kind, without hard labour.'],['may extent … may extend','ceilings, not minimums; “extent” is a misprint in the bare act.']],
+  links:[['s.5(3)','r3'],['s.7(2) penalty for no notice of talaq','5:r4'],['s.6(5)(b) polygamy penalty','4:r6'],['s.11(2) breach of rules','9:r2']],cases:[],
+  bnd:'<h4>Boundary map: penalties in the Ordinance (bare act, updated to 10-3-2022)</h4><table><tr><th>Provision</th><th>Offence</th><th>Ceiling</th></tr><tr><td>s.5(4)</td><td>not reporting a marriage</td><td>3 months or Rs 1,000 or both</td></tr><tr><td>s.6(5)(b)</td><td>second marriage without permission</td><td>1 year or Rs 5,000 or both</td></tr><tr><td>s.7(2)</td><td>no notice of talaq</td><td>1 year or Rs 5,000 or both</td></tr><tr><td>s.11(2)</td><td>breach of rules (if rules so provide)</td><td>1 month or Rs 200 or both</td></tr></table><p>A Punjab Police compilation (undated, amending Act not named) shows a different s.5: an added sub-section (2A) obliging the Registrar or solemnizer to complete the nikah nama accurately, and larger fines (Rs 100,000 with 3 months in s.5(4); Rs 25,000 with 1 month for (2A)). Those figures are not in the bare act used here and are not verified; treat the table above as the federal text.</p>'},
+ {id:'r5',code:'s.5(5)',term:'Form, registers, records, copies and fees: left to the Rules',sub:'“As may be prescribed”: the detail is in the Rules under s.11',tests:'what the Ordinance leaves to the Rules',
+  hook:'The Ordinance sketches the register; the Rules ink it in.',
+  text:'<b>(5)</b> The form of nikah nama, the registers to be maintained by Nikah Registrars, the records to be preserved by Union Councils, the manner in which marriages shall be registered and copies of nikah nama shall be supplied to the parties and the fees to be charged thereof, shall be such as may be prescribed.',
+  plain:[['nikah nama','the marriage deed in the prescribed form; its dower and special-condition columns feed ss.6, 8 and 10.'],['records preserved by Union Councils','each Union Council keeps the register, so s.5(6) inspection is at its office.'],['as may be prescribed','fixed by rules under s.11 (s.2(c)).']],
+  links:[['s.2(c) prescribed','1:r6'],['s.11 rules','9:r1'],['s.10 dower and the nikah nama','8:r2'],['s.5(6) inspection','r6']],
+  cases:[
+   {n:'Supreme Court directions on completing the Nikahnama (title not given in the reports)',c:'Supreme Court of Pakistan, five-judge bench headed by Shahid Waheed J, 22 September 2026',t:'Reported as directing Registrars to use the prescribed Nikahnama and fill every relevant column, leaving none blank without lawful basis; to read the dower, special-condition and delegated-talaq entries to the parties before signing; and to give copies and forward one to the Union Council.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: what s.5(5) leaves to the Rules</h4><table><tr><th>Item</th><th>Left to the Rules</th></tr><tr><td>Form of the nikah nama</td><td>yes</td></tr><tr><td>Registers kept by Registrars</td><td>yes</td></tr><tr><td>Records kept by Union Councils</td><td>yes</td></tr><tr><td>Manner of registering</td><td>yes</td></tr><tr><td>Supply of copies to the parties</td><td>yes</td></tr><tr><td>Fees</td><td>yes</td></tr><tr><td>Who must register and the penalty</td><td>no: in the Ordinance (ss.5(1), (3), (4))</td></tr></table>'},
+ {id:'r6',code:'s.5(6)',term:'Public inspection and copies',sub:'Any person, on payment of the prescribed fee, if any',tests:'who may inspect the register',
+  hook:'The marriage register is a public book: anyone can read it for the price of a fee.',
+  text:'<b>(6)</b> Any person may, on payment of the prescribed fee, if any, inspect at the office of the Union Council the record preserved under sub-section (5), or obtain a copy of any entry therein.',
+  plain:[['any person','no interest need be shown on the words of the text.'],['prescribed fee, if any','the Rules may set a fee or none.'],['record preserved under sub-section (5)','the Union Council’s register of marriages.']],
+  links:[['s.5(5)','r5']],cases:[],
+  bnd:'<h4>Boundary map: access to the register</h4><table><tr><th>Who</th><th>Right under s.5(6)</th></tr><tr><td>Husband or wife</td><td>yes (and copies under s.5(5))</td></tr><tr><td>A stranger</td><td>yes: “any person”</td></tr><tr><td>A court</td><td>not dealt with in s.5(6); court process is separate</td></tr></table>'}
+ ],
+ spar:[
+  {q:'A village cleric performs a nikah, nobody informs the Registrar, and two years later the husband denies the marriage. Is the nikah valid, who committed an offence, and what is the maximum punishment?',a:'The nikah is not made invalid merely by non-registration (Arif Hussain v The State, PLD 1982 FSC 42, as reported). The person who solemnized it breached s.5(3) and is punishable under s.5(4) with simple imprisonment up to three months, a fine up to Rs 1,000, or both. Proof of the marriage is a separate question; the register would have been the easy proof.'},
+  {q:'The Union Council licenses two Nikah Registrars for the same Ward. Is that allowed, and what if it licenses one person for two Wards?',a:'Two for one Ward is forbidden: “in no case shall more than [one] Nikah Registrar be licensed for any one Ward” (s.5(2)). One person for two Wards is not addressed by the words; the limit is per Ward. Open to argument.'},
+  {q:'Cross-module: s.6(1) says an unpermitted second marriage “shall not be registered under this Ordinance”, while s.5(1) says every Muslim marriage must be registered. How do you reconcile them?',a:'Read together, s.6(1) is a specific bar on registration for the unpermitted marriage, and s.5(1) is the general duty. The solemnizer’s duty to report in s.5(3) is expressed for any marriage not solemnized by the Registrar and is not limited by s.6(1) in terms. The text does not settle how the two interact; open to argument.'},
+  {q:'Cross-module: a nikah nama leaves the dower column blank. Which section fills the gap, and how does the Supreme Court’s 2026 direction to Registrars (as reported) bear on it?',a:'Section 10: where no details about the mode of payment of dower are specified in the nikah nama or marriage contract, the entire dower is payable on demand. The reported 2026 directions tell Registrars not to leave dower columns blank without lawful basis, so the gap should arise less often. See Module 8.'}
+ ]
+};
+
+MD[4]={
+ tag:'Module 4 · s.6 · Gate',
+ title:'Polygamy',
+ intro:'A man who already has a wife needs the Arbitration Council’s written permission before taking another. The gate walks one case from the existing marriage to the consequences; the rails give the text of each sub-section.',
+ recall:'Existing marriage + another marriage = permission first (1). Apply to the Chairman, state reasons and whether the wife consented (2). Council with a nominee from each side decides “necessary and just” (3). Reasons recorded; revision to the Collector is final (4). Without permission: dower due at once, plus up to a year or Rs 5,000 (5).',
+ rails:[
+ {id:'r1',code:'s.6(1)',term:'No further marriage without the Council’s written permission',sub:'During an existing marriage; unpermitted marriage may not be registered',ess:'subsisting marriage; previous written permission; Arbitration Council',exam:true,
+  hook:'Permission first, wedding second: the order is part of the rule.',
+  text:'<b>6. Polygamy.</b>&mdash;<b>(1)</b> No man, during the subsistence of an existing marriage, shall, except with the previous permission in writing of the Arbitration Council, contract another marriage, nor shall any such marriage contracted without such permission be registered under this Ordinance.',
+  plain:[['subsistence of an existing marriage','while a marriage is still in force. A talaq pronounced but not yet effective under s.7(3) has not ended it.'],['previous permission in writing','permission obtained before the marriage and recorded on paper.'],['Arbitration Council','see s.2(a): the Chairman and a nominee of each side.'],['contract another marriage','any further marriage: the section does not say second, third or fourth.']],
+  ex:'A man pronounces talaq on his wife and, thirty days later, marries again, before giving the Chairman notice or waiting out the ninety days. His first marriage has not ended (s.7(3)), so his new marriage is “another marriage” during the subsistence of an existing one, and s.6(1) is engaged. Reading from the two sections together; not tested in a case.',
+  links:[['s.6(2) application','r2'],['s.6(5) consequences','r5'],['s.7(3): when an existing marriage ends','5:r5'],['s.5(1) registration','3:r1'],['s.2(a) Council','1:r4']],
+  cases:[
+   {n:'Dilshad Bibi v her husband (named Liaqat Ali Mir in some reports, Muzaffar Mir in another)',c:'Islamabad High Court, June 2019, Athar Minallah CJ',t:'Reported as holding that the Arbitration Council’s permission is compulsory, and that a first wife’s consent alone does not replace it: a man who remarries without the Council’s permission is liable to punishment even if the first wife agreed. The Council must weigh the factors in ss.6(2) to (4) and cannot grant permission mechanically. A sentence of one month and Rs 5,000 was reported; the case was remitted for rehearing.',v:1,fl:'news report'},
+   {n:'Appeal against a Peshawar High Court order for immediate payment of dower (title not given)',c:'Supreme Court of Pakistan, reported 26 August 2020',t:'Reported in a news snippet as noting that s.6 prohibits a second marriage without the Arbitration Council’s prior written permission. Only the snippet was read.',v:1,fl:'news snippet'},
+   {n:'Second marriage without first wife’s consent (titles not given)',c:'Supreme Court of Pakistan, reported October 2025 and March 2026',t:'Reported as holding that a husband’s second marriage without the first wife’s consent is a valid ground on which she may seek dissolution, and as warning that a man who remarries without her consent or the Council’s approval may face both civil and criminal proceedings.',v:1,fl:'news report'},
+   {n:'Petition challenging section 6 (title not given)',c:'Islamabad High Court, Athar Minallah CJ, date not stated in the report',t:'Reported as dismissing a petition by a woman who wanted to become a third wife and challenged s.6.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: marriage count and the state of the existing marriage</h4><table><tr><th>Facts</th><th>s.6(1) engaged?</th></tr><tr><td>First marriage (no existing marriage)</td><td>no</td></tr><tr><td>Second marriage (one wife)</td><td>yes</td></tr><tr><td>Third marriage (two wives)</td><td>yes: permission needed again</td></tr><tr><td>Fourth marriage (three wives)</td><td>yes</td></tr><tr><td>Fifth or later</td><td>text sets no cap; any limit lies outside the Ordinance</td></tr><tr><td>Talaq effective under s.7</td><td>no: the marriage has ended</td></tr><tr><td>Talaq pronounced, still inside the ninety days (or the pregnancy)</td><td>yes: marriage still subsists</td></tr><tr><td>Talaq revoked</td><td>yes: marriage continues</td></tr><tr><td>Wife dead</td><td>no existing marriage with her; text silent on others</td></tr></table>'},
+ {id:'r2',code:'s.6(2)',term:'The application to the Chairman',sub:'Prescribed manner and fee; reasons; whether the existing wife or wives consented',ess:'application to the Chairman; reasons; statement of consent',exam:true,
+  hook:'Three things go in the envelope: the fee, the reasons, and a line on whether the first wife said yes.',
+  text:'<b>(2)</b> An application for permission under sub-section (1) shall be submitted to the Chairman in the prescribed manner, together with the prescribed fee, and shall state reasons for the proposed marriage, and whether the consent of the existing wife or wives has been obtained thereto.',
+  plain:[['prescribed manner … prescribed fee','set by the Rules under s.11.'],['state reasons','the applicant must say why he wants to marry again.'],['whether the consent of the existing wife or wives has been obtained','he must state whether she consented, yes or no; the words do not make consent a condition.']],
+  links:[['s.6(1)','r1'],['s.6(3) Council','r3'],['s.2(b) Chairman','1:r5'],['s.11 Rules','9:r1']],
+  cases:[
+   {n:'Dilshad Bibi v her husband (IHC, June 2019)',c:'Islamabad High Court, Athar Minallah CJ',t:'Reported as stressing that, contrary to popular belief, the first wife’s consent is not the only requirement: the Council’s approval is compulsory as well.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: the wife’s consent against the Council’s permission</h4><table><tr><th>First wife</th><th>Council permission</th><th>Result</th></tr><tr><td>consents</td><td>granted</td><td>lawful under s.6(1)</td></tr><tr><td>consents</td><td>not obtained</td><td>offence: consent does not replace permission (IHC 2019, as reported)</td></tr><tr><td>does not consent</td><td>granted</td><td>reading: permission is valid on the words, since consent is a fact to be stated, not a condition; the wife can use the revision in s.6(4)</td></tr><tr><td>does not consent</td><td>not obtained</td><td>offence; dower due at once; the wife may also seek dissolution on the reported Supreme Court view</td></tr></table>'},
+ {id:'r3',code:'s.6(3)',term:'Constituting the Council; “necessary and just”',sub:'Applicant and each existing wife nominate a representative; permission may carry conditions',ess:'Council with a nominee of each side; satisfied the marriage is necessary and just',exam:true,
+  hook:'The law asks two questions, not one: is the second marriage necessary, and is it just?',
+  text:'<b>(3)</b> On receipt of the application under sub-section (2), the Chairman shall ask the applicant and his existing wife or wives each to nominate a representative, and the Arbitration Council so constituted may, if satisfied that the proposed marriage is necessary and just, grant, subject to such conditions, if any, as may be deemed fit, the permission applied for.',
+  plain:[['each to nominate a representative','the applicant and every existing wife name one nominee each.'],['may, if satisfied','the Council has a discretion; it is not bound to grant.'],['necessary and just','both words must be met; the Ordinance gives no list of grounds, so commonly cited grounds such as infirmity or childlessness are not in this text (check the Rules in Module 9).'],['subject to such conditions','the Council may attach conditions to the permission.']],
+  links:[['s.2(a) proviso: party names no nominee','1:r4'],['s.6(4) reasons and revision','r4'],['s.6(2)','r2']],
+  cases:[
+   {n:'Dilshad Bibi v her husband (IHC, June 2019)',c:'Islamabad High Court, Athar Minallah CJ',t:'Reported as holding that the Council must consider the factors prescribed in ss.6(2) to (4) and be satisfied that the marriage is just and necessary before it grants permission.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: who sits and what the Council decides</h4><table><tr><th>Member</th><th>Role</th></tr><tr><td>Chairman</td><td>constitutes the Council on receipt of the application</td></tr><tr><td>Applicant’s nominee</td><td>one</td></tr><tr><td>Each existing wife’s nominee</td><td>one for each wife</td></tr><tr><td>A party names no nominee in time</td><td>body formed without that representative is still the Council (s.2(a))</td></tr></table><table><tr><th>Council finding</th><th>Effect</th></tr><tr><td>Satisfied: necessary and just</td><td>may grant, with or without conditions</td></tr><tr><td>Satisfied on one limb only</td><td>not enough on the words: both are required</td></tr><tr><td>Not satisfied</td><td>no permission; reasons recorded; revision available</td></tr></table>'},
+ {id:'r4',code:'s.6(4)',term:'Reasons and revision to the Collector',sub:'Any party may seek revision; the Collector’s decision is final',ess:'reasons recorded; revision to the Collector; finality',exam:true,
+  hook:'Say why, and if someone disagrees there is one more door: the Collector, whose word is the last.',
+  text:'<b>(4)</b> In deciding the application the Arbitration Council shall record its reasons for the decision, and any party may, in the prescribed manner, within the prescribed period, and on payment of the prescribed fee, prefer an application for revision, to the Collector concerned and his decision shall be final and shall not be called in question in any Court.',
+  plain:[['record its reasons','a written statement of why it granted or refused.'],['any party','the applicant or an existing wife, whichever is aggrieved.'],['Collector','an officer; “to the Collector” replaced earlier words by F.A.O. 1975 (printed footnote).'],['final … not be called in question in any Court','the text excludes court challenge; how far that holds against constitutional jurisdiction is outside the Ordinance and not checked.']],
+  links:[['s.6(3)','r3'],['s.9(2): the same device for maintenance','7:r2']],cases:[],
+  bnd:'<h4>Boundary map: after the Council decides</h4><table><tr><th>Outcome</th><th>Who may seek revision</th><th>Final?</th></tr><tr><td>Permission granted</td><td>an existing wife (or other party)</td><td>Collector’s decision final</td></tr><tr><td>Permission refused</td><td>the applicant</td><td>Collector’s decision final</td></tr><tr><td>No revision sought</td><td>nobody</td><td>Council’s decision stands</td></tr><tr><td>Revision out of time or unpaid fee</td><td>not within the prescribed conditions</td><td>depends on the Rules</td></tr></table>'},
+ {id:'r5',code:'s.6(5)(a)',term:'Dower becomes payable at once',sub:'Entire dower, prompt or deferred, due to the existing wife or wives; recoverable as arrears of land revenue',ess:'entire dower, prompt or deferred; immediately',exam:true,
+  hook:'Marry without permission and the bill for every wife’s dower arrives on the same day.',
+  text:'<b>(5)</b> Any man who contracts another marriage without the permission of the Arbitration Council shall&mdash;<br><b>(a)</b> pay immediately the entire amount of the dower, whether prompt or deferred, due to the existing wife or wives, which amount, if not so paid, shall be recoverable as arrears of land revenue; and',
+  plain:[['entire amount of the dower','all of it, including the part the nikah nama said was payable later.'],['prompt or deferred','prompt is payable on demand; deferred is payable at a stated later event. Both become due at once.'],['existing wife or wives','every wife already married to him, each for her own dower.'],['arrears of land revenue','recovered by the revenue machinery, like unpaid land revenue.']],
+  ex:'A man has two wives with dower of Rs 100,000 each, half prompt and half deferred until divorce or death. He marries a third time without permission. Both wives’ full Rs 100,000 becomes payable now.',
+  links:[['s.10 dower, unspecified mode','8:r1'],['s.6(5)(b) penalty','r6'],['s.6(1)','r1']],
+  cases:[
+   {n:'Appeal against a Peshawar High Court order for immediate payment of dower (title not given)',c:'Supreme Court of Pakistan, reported 26 August 2020',t:'The appeal arose from a Peshawar High Court order directing a man to pay his first wife’s dower immediately after a second marriage without permission. The snippet read does not give the outcome in full.',v:1,fl:'news snippet'}
+  ],
+  bnd:'<h4>Boundary map: dower types against s.6(5)(a)</h4><table><tr><th>Dower</th><th>Normal time of payment</th><th>After an unpermitted marriage</th></tr><tr><td>Prompt (mu’ajjal)</td><td>on demand</td><td>due immediately</td></tr><tr><td>Deferred (mu’wajjal)</td><td>stated later event</td><td>due immediately</td></tr><tr><td>Mode unspecified (s.10)</td><td>on demand</td><td>due immediately</td></tr><tr><td>Already paid</td><td>nothing outstanding</td><td>nothing further</td></tr></table>'},
+ {id:'r6',code:'s.6(5)(b)',term:'Criminal penalty, on complaint',sub:'Simple imprisonment up to one year, or fine up to Rs 5,000, or both',ess:'conviction upon complaint; 1 year or Rs 5,000 or both',exam:true,
+  hook:'The criminal case starts with a complaint, not with the police: someone has to bring it.',
+  text:'<b>(b)</b> on conviction upon complaint be punishable with simple imprisonment which may extend to one year, or with fine which may extend to five thousand rupees, or with both.',
+  plain:[['upon complaint','the prosecution is started by a complaint; the text does not say who may file it.'],['simple imprisonment','the lighter kind, without hard labour.'],['may extend','ceilings, not minimums.']],
+  links:[['s.6(5)(a)','r5'],['s.5(4), s.7(2): other penalties','3:r4']],
+  cases:[
+   {n:'Dilshad Bibi v her husband (IHC, June 2019)',c:'Islamabad High Court, Athar Minallah CJ',t:'A sentence of one month’s imprisonment and a fine of Rs 5,000 was reported, within the ceilings of s.6(5)(b).',v:1,fl:'news report'},
+   {n:'Family-court convictions in Lahore (titles not given)',c:'reported by Nukta, November 2024, including a Lahore High Court bail refusal in 2022 (Ghulam Hussain)',t:'Reports describe sentences of six and seven months with a fine of Rs 500,000. That fine is far above the Rs 5,000 ceiling in the bare act; a Punjab Police compilation does show a Rs 500,000 fine in s.6 as amended, so the reports probably reflect a Punjab amendment (amending Act not identified). Not resolved.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: ceilings, federal text against the Punjab compilation</h4><table><tr><th>Source</th><th>Imprisonment</th><th>Fine</th></tr><tr><td>Bare act used here (updated to 10-3-2022)</td><td>up to 1 year</td><td>up to Rs 5,000</td></tr><tr><td>Punjab Police compilation (undated)</td><td>up to 1 year</td><td>up to Rs 500,000</td></tr><tr><td>IHC 2019 report</td><td>1 month</td><td>Rs 5,000</td></tr><tr><td>Lahore family-court reports</td><td>6 to 7 months</td><td>Rs 500,000</td></tr></table><p>The two ceilings cannot both be the law in the same place and time. Which applies depends on the amending Act and its territorial reach, which this build has not traced.</p>'}
+ ],
+ spar:[
+  {q:'A man pronounces talaq on his first wife on 1 March and marries again on 15 March, without the Council’s permission. Is s.6 engaged?',a:'On the reading in this app, yes: his first marriage has not ended, because a talaq is not effective until ninety days after notice is delivered (s.7(3)). So he contracts “another marriage” during an existing one, and s.6(5) applies: dower due at once and the criminal penalty. A reading from two sections, not tested in a case.'},
+  {q:'The first wife consents in writing to her husband’s second marriage, but he never applies to the Chairman. Is the marriage lawful?',a:'No. The wife’s consent is one fact the application must state (s.6(2)); permission comes from the Arbitration Council (s.6(1)). The Islamabad High Court (June 2019, as reported) held that the Council’s permission is compulsory even where the first wife agrees.'},
+  {q:'Cross-module: compare s.6(5)(a) with s.10. A nikah nama gives a dower of Rs 200,000 and says nothing about when it is payable. The husband marries again without permission. When is the dower due, and by which section?',a:'Under s.10, with no mode of payment specified, the entire dower is payable on demand. Under s.6(5)(a), on an unpermitted second marriage the entire dower, prompt or deferred, becomes payable immediately. So it is due at once under s.6(5)(a) in any event. Section 10 matters for the earlier period.'},
+  {q:'Cross-module: compare s.6 with s.7(6). Which requires a prior permission and which a prior marriage by the wife to someone else, and in each case what is the thing that stops the man?',a:'Section 6(1) requires the Arbitration Council’s previous written permission before a man marries again during an existing marriage. Section 7(6) says that after a third effective talaq between the same two people the wife cannot remarry the same husband without an intervening marriage with a third person. The first is a permission from a body; the second is a marriage by the woman to someone else.'},
+  {q:'The reports speak of fines of Rs 500,000 for a second marriage without permission, while the bare act says Rs 5,000. How would you handle the discrepancy in an answer?',a:'State the bare-act ceiling (Rs 5,000) and say a later or provincial text may differ. A Punjab Police compilation shows Rs 500,000, but the amending Act has not been traced. Flag it as unresolved rather than choosing one figure.'}
+ ]
+};
+MD[4].gate={title:'Walk a case through s.6',timeline:false,steps:[
+ {id:'exist',t:'Is a marriage already subsisting?',ref:'s.6(1)',q:'Is the man in an existing marriage at the time of the proposed marriage? (A talaq pronounced but not yet effective under s.7(3) still counts as subsisting.)',
+  y:{n:'Existing marriage: any further marriage needs the Arbitration Council’s previous written permission. The Ordinance sets no cap on the number of wives; each further marriage meets the same test.'},
+  n:{n:'No existing marriage.',end:'No marriage subsists, so s.6(1) is not engaged: this is a first marriage, or a marriage after the earlier one has ended. An earlier marriage ends when a talaq becomes effective under s.7; a talaq still inside its ninety days has not ended it (s.7(3)).'}},
+ {id:'apply',t:'Written application to the Chairman',ref:'s.6(2)',q:'Has the man applied to the Chairman in the prescribed manner, with the fee, stating reasons and whether the existing wife or wives consented?',
+  y:{n:'Application made. It must state reasons and whether the existing wife’s consent has been obtained. The text asks for a statement of consent, not for consent as a condition.'},
+  n:{n:'No application, so no permission can exist. Skipping to whether he married anyway.',go:'did'}},
+ {id:'council',t:'Council constituted with a nominee from each side',ref:'s.6(3), s.2(a)',q:'Did the Chairman ask the applicant and each existing wife to nominate a representative, and was the Arbitration Council constituted?',
+  y:{n:'Council constituted. If a party named no representative within the prescribed time, the body formed without that representative is still the Council (s.2(a) proviso).'},
+  n:{n:'No Council constituted.',end:'Without a constituted Council there is no permission, and the text gives the applicant no remedy against a Chairman who does nothing: the revision in s.6(4) is against the Council’s decision. If the man marries anyway, s.6(5) applies: the entire dower due to the existing wife or wives is payable at once, and he is liable on conviction upon complaint to simple imprisonment up to one year, or a fine up to Rs 5,000, or both (bare act). What an applicant can do about inaction is not answered by the text; open to argument.'}},
+ {id:'sat',t:'Council satisfied: “necessary and just”',ref:'s.6(3)',q:'Is the Arbitration Council satisfied that the proposed marriage is necessary and just, and does it grant permission (subject to any conditions)?',
+  y:{n:'Permission granted, in writing, subject to any conditions. Reasons must be recorded (s.6(4)).',go:'did'},
+  n:{n:'Not satisfied: permission refused. Reasons must be recorded, and any party may seek revision.'}},
+ {id:'rev',t:'Revision to the Collector',ref:'s.6(4)',q:'Did a party seek revision to the Collector, and did the Collector’s decision leave the applicant with permission?',
+  y:{n:'The Collector’s decision leaves permission in place. It is final and cannot be called in question in any court (text of s.6(4)).'},
+  n:{n:'No permission after the Council’s decision (no revision sought, or the Collector did not grant it).'}},
+ {id:'did',t:'Further marriage contracted',ref:'s.6(1), s.6(5)',q:'Did the man contract the further marriage?',
+  y:{n:'Marriage contracted. The outcome depends on whether permission existed at that moment.'},
+  n:{n:'No further marriage contracted.',end:'No further marriage was contracted, so s.6(5) is not engaged. Permission, if granted, is a permission and not a duty. Whether the existing marriage ends is a separate matter (Module 5).'}}
+ ],
+ final:function(m){
+  var perm=m.sat==='y'||m.rev==='y';
+  if(perm)return 'Marriage contracted with the Arbitration Council’s previous written permission: lawful under s.6(1), and it may be registered under the Ordinance (s.6(1) bars registration only of a marriage contracted without permission). Any conditions attached to the permission must be met.';
+  return 'Marriage contracted without the Arbitration Council’s previous written permission. Consequences under s.6(5): (a) the entire dower, prompt or deferred, due to the existing wife or wives is payable immediately, and if unpaid is recoverable as arrears of land revenue; (b) on conviction upon complaint, simple imprisonment up to one year, or a fine up to Rs 5,000, or both (bare act; a Punjab compilation shows a larger fine). The marriage may not be registered under the Ordinance (s.6(1)). The Islamabad High Court (2019, as reported) held that the first wife’s consent alone does not replace the Council’s permission, and the Supreme Court (reported 2025 and 2026) has treated a second marriage without her consent as a ground on which she may seek dissolution.';
+ }};
+
+MD[5]={
+ tag:'Module 5 · s.7 · Gate',
+ title:'Talaq',
+ intro:'Section 7 runs on the date the notice reaches the Chairman, not the date of pronouncement. Use the gate to walk one case through the section, then open the rails for the text of each sub-section.',
+ rails:[
+ {id:'r1',code:'s.7(1)',term:'Notice of talaq to the Chairman',sub:'Any form of pronouncement; written notice; copy to the wife',ess:'notice to the Chairman',exam:true,
+  hook:'Saying it is not enough: the law starts its clock only when the paper reaches the Chairman.',
+  text:'<b>(1)</b> Any man who wishes to divorce his wife shall, as soon as may be after the pronouncement of talaq in any form whatsoever, give the Chairman notice in writing of his having done so, and shall supply a copy thereof to the wife:',
+  plain:[['in any form whatsoever','whatever words or manner the husband used.'],['as soon as may be','promptly; the sub-section fixes no number of days.'],['Chairman','the Union Council Chairman, or a person appointed under s.2(b) to do the Chairman’s work.'],['notice in writing','a written statement, not an oral report.']],
+  links:[['s.7(2) penalty','r4'],['s.7(3) 90-day rule','r5'],['proviso (Jafri)','r2']],
+  cases:[
+   {n:'Muhammad Hassan Sultan v Chairman Union Council, Cantonment Board Office, Karachi and another (Morial Shah)',c:'Supreme Court of Pakistan, Nov 2025, Civil Petition No. 5364 of 2024; three-member bench (CJ Yahya Afridi, Shafi Siddiqui J, Miangul Hassan Aurangzeb J)',t:'Section 7 applies to every form of talaq, including talaq-e-bidat; no talaq takes effect before the 90 days run; a wife holding an unconditional delegated right could withdraw her notice within the 90 days. Appeal from Sindh High Court, 7 Oct 2024 (C.P. S-525/2024), dismissed.',v:1},
+   {n:'Syed Ali Nawaz Gardezi v Lt Col Muhammad Yusuf',c:'Supreme Court of Pakistan',t:'PLD 1963 SC 51. Citation confirmed. A secondary article (Islamabad Law Review, 2023) reports that it held the Ordinance reaches a marriage between a Pakistani Muslim man and a non-citizen Muslim or non-Muslim woman (see s.1(2)). The older note that it treats notice to the Chairman as mandatory for a talaq to take effect was not traced; later authority is said to have moved away from it.',v:2}
+  ]},
+ {id:'r2',code:'s.7(1) proviso',term:'Fiqah-e-Jafria: how talaq must be pronounced',sub:'Arabic words, two witnesses, free will; disputes to court or Mujtahid-e-Alam',tests:'valid pronouncement (Jafri)',
+  hook:'Same notice rule, stricter pronouncement: for Jafri couples the words, the witnesses and the state of mind all count.',
+  text:'Provided that where the parties belong to Fiqah-e-Jafria,&mdash;<br><b>(a)</b> the man may voluntarily and with his free will pronounce himself or through duly authorized attorney (Vakil) Talaq uttering in literal Arabic words (seegha) in the physical presence of at least two witnesses qualifying the requirements of clause (1) of Article 17 of the Qanun-e-Shahadat, 1984 (P.O. No. 1 of 1984);<br><b>(b)</b> the pronouncement of Talaq shall be ineffective if it is done jokingly or under anger, intoxication, insanity, duress or coercion of any kind and from any corner whatsoever; and<br><b>(c)</b> in case of dispute, with reference to clauses (a) or (b) arising due to difference of opinion, the parties or any of the parties may have recourse to a court of competent jurisdiction or by approaching the “Mujtahid-e-Alam” and the decision of Mujtahid-e-Alam shall have a status of an award and the same shall be dealt with in accordance with the provisions of the Arbitration Act, 1940 (X of 1940).<br><b>Explanation.</b>&mdash;The expression “Mujtahid-e-Alam (Faqih-e-Azam)” means a juris-consult, religious scholar or doctor of Shia school of thought well versed with Shariah having international repute and of such recognition. The Council of Islamic Ideology shall maintain a panel of Mujtahid-e-Alam having aforesaid qualifications.',
+  plain:[['seegha','the prescribed Arabic wording of the pronouncement.'],['Vakil','an authorised attorney; the husband may pronounce through one.'],['Mujtahid-e-Alam','a senior Shia jurist on the Council of Islamic Ideology’s panel.'],['status of an award','his decision is treated like an arbitration award and handled under the Arbitration Act, 1940.']],
+  links:[['s.7(1)','r1'],['s.7(1A)','r3']],
+  cases:[],
+  bnd:'<h4>Boundary map: states at pronouncement</h4><table><tr><th>Condition</th><th>Effect under clause (b)</th></tr><tr><td>Jokingly</td><td>ineffective</td></tr><tr><td>Under anger</td><td>ineffective</td></tr><tr><td>Intoxication</td><td>ineffective</td></tr><tr><td>Insanity</td><td>ineffective</td></tr><tr><td>Duress or coercion</td><td>ineffective</td></tr><tr><td>Free will, Arabic words, two witnesses</td><td>required by clause (a)</td></tr></table><p>The proviso was substituted and inserted by Act XXIX of 2021 (per the printed footnote).</p>'},
+ {id:'r3',code:'s.7(1A)',term:'Jafri personal law decides divorce',sub:'Article 227, as the text itself recites',tests:'which personal law decides',
+  hook:'One sentence that hands Jafri divorce to Jafri law.',
+  text:'<b>(1A)</b> As enshrined in Article 227 of the Constitution of the Islamic Republic of Pakistan, the divorce and matters connected therewith or ancillary thereto shall be decided according to the personal law interpreted by Fiqah-e-Jafria (Shia school of thought).',
+  plain:[['ancillary','connected with, and following from, the divorce itself.'],['Article 227','the Constitution provision the sub-section itself relies on; read it in the Constitution (not yet checked in this build).']],
+  links:[['proviso (Jafri)','r2'],['s.7(1)','r1']],cases:[]},
+ {id:'r4',code:'s.7(2)',term:'Penalty for no notice',sub:'Simple imprisonment up to one year, or fine up to Rs 5,000, or both',tests:'consequence of contravening s.7(1)',
+  hook:'Skip the notice, risk a year.',
+  text:'<b>(2)</b> Whoever contravenes the provisions of sub-section (1) shall be punishable with simple imprisonment for a term which may extend to one year or with fine which may extend to five thousand rupees or with both.',
+  plain:[['simple imprisonment','the lighter kind of imprisonment, without hard labour.'],['may extend','a ceiling, not a minimum.'],['contravenes sub-section (1)','fails to give the Chairman written notice, or fails to supply the wife a copy.']],
+  links:[['s.7(1)','r1'],['s.7(3)','r5']],cases:[],
+  bnd:'<h4>Boundary map: penalties across the Ordinance</h4><table><tr><th>Provision</th><th>Offence</th><th>Ceiling</th></tr><tr><td>s.5(4)</td><td>not reporting a marriage</td><td>3 months or Rs 1,000 or both</td></tr><tr><td>s.6(5)(b)</td><td>second marriage without permission</td><td>1 year or Rs 5,000 or both</td></tr><tr><td>s.7(2)</td><td>no notice of talaq</td><td>1 year or Rs 5,000 or both</td></tr><tr><td>s.11(2)</td><td>breach of rules (if rules so provide)</td><td>1 month or Rs 200 or both</td></tr></table>'},
+ {id:'r5',code:'s.7(3)',term:'The 90-day rule',sub:'Not effective until ninety days after notice is delivered, unless revoked',ess:'90 days, no revocation',exam:true,
+  hook:'Pronounced is not divorced: the marriage survives until ninety days after the notice lands.',
+  text:'<b>(3)</b> Save as provided in sub-section (5), a talaq unless revoked earlier, expressly or otherwise shall not be effective until the expiration of ninety days from the day on which notice under sub-section (1) is delivered to the Chairman.',
+  plain:[['Save as provided in sub-section (5)','except for the pregnancy rule.'],['revoked earlier, expressly or otherwise','taken back in words or by conduct before the period ends.'],['expiration of ninety days','the whole period has to run out; the talaq is not effective while it is still running.'],['from the day on which notice is delivered','counted from delivery to the Chairman, not from the pronouncement.']],
+  links:[['s.7(1) notice','r1'],['s.7(4) Council','r6'],['s.7(5) pregnancy','r7']],
+  cases:[
+   {n:'Muhammad Hassan Sultan v Chairman Union Council, Cantonment Board Office, Karachi and another',c:'Supreme Court of Pakistan, Nov 2025, Civil Petition No. 5364 of 2024',t:'No divorce, in any form, is effective until the 90 days expire; revocation within the period is lawful. Also touches s.8: delegated talaq follows s.7.',v:1}
+  ],
+  bnd:'<h4>Boundary map: time points (Day 0 = day notice is delivered)</h4><table><tr><th>Point</th><th>Position</th></tr><tr><td>Before notice</td><td>no clock; s.7(3) counts from delivery to the Chairman</td></tr><tr><td>Day 0</td><td>notice delivered; clock starts</td></tr><tr><td>Day 1 to 29</td><td>Chairman may constitute the Council; talaq not effective</td></tr><tr><td>Day 30</td><td>last day for the Chairman to constitute the Council (s.7(4))</td></tr><tr><td>Day 31 to 89</td><td>talaq not effective; revocation still possible</td></tr><tr><td>Day 90</td><td>reading: the ninety days expire at the end of Day 90, so the talaq is not yet effective during it; effective from Day 91 if unrevoked and no pregnancy. Open to argument; not checked against case law</td></tr></table>'},
+ {id:'r6',code:'s.7(4)',term:'Arbitration Council within thirty days',sub:'Chairman’s duty; reconciliation',tests:'Chairman’s duty to constitute the Council',exam:true,
+  hook:'A thirty-day deadline for the Chairman, a ninety-day wait for the marriage: the gap is for reconciliation.',
+  text:'<b>(4)</b> Within thirty days of the receipt of notice under sub-section (1), the Chairman shall constitute an Arbitration Council for the purpose of bringing about a reconciliation between the parties, and the Arbitration Council shall take all steps necessary to bring about such reconciliation.',
+  plain:[['Arbitration Council','the Chairman plus a representative of each party (s.2(a)); if a party fails to nominate in the prescribed time, the body formed without that representative is the Council.'],['Chairman','if the Union Council Chairman is non-Muslim, wishes to apply himself, or cannot act, the Council elects a Muslim member as Chairman for this Ordinance (s.2(b) proviso).'],['reconciliation','bringing the spouses back together; the Council’s only stated purpose here.']],
+  links:[['s.7(3)','r5'],['s.7(1)','r1']],cases:[],
+  bnd:'<h4>Boundary map: who sits on the Council (s.2(a), s.2(b))</h4><table><tr><th>Member</th><th>Rule</th></tr><tr><td>Chairman</td><td>Union Council Chairman, or an appointee; a Muslim member is elected if the Chairman is non-Muslim, interested or unable</td></tr><tr><td>Husband’s representative</td><td>nominated by him</td></tr><tr><td>Wife’s representative</td><td>nominated by her</td></tr><tr><td>A party names no one in time</td><td>Council formed without that representative</td></tr></table><p>The text does not say what a missed thirty-day deadline does to the ninety days. Reading: the s.7(3) clock still runs from delivery of notice. Not checked against case law.</p>'},
+ {id:'r7',code:'s.7(5)',term:'Pregnancy',sub:'Later of the ninety days and the end of the pregnancy',ess:'pregnancy extension',exam:true,
+  hook:'Pregnancy stretches the clock: the later of ninety days and the end of the pregnancy.',
+  text:'<b>(5)</b> If the wife be pregnant at the time talaq is pronounced, talaq shall not be effective until the period mentioned in sub-section (3) or the pregnancy, whichever be later, ends.',
+  plain:[['at the time talaq is pronounced','pregnancy is judged at pronouncement, not at notice.'],['whichever be later','if the pregnancy outlasts the ninety days, the talaq waits for it.'],['sub-section (3)','the ninety-day period (printed as “(3)” after a 1961 substitution for “(2)”).']],
+  links:[['s.7(3)','r5']],cases:[],
+  bnd:'<h4>Boundary map: pregnancy against the 90 days</h4><table><tr><th>Facts</th><th>Effective when</th></tr><tr><td>Not pregnant at pronouncement</td><td>90 days expire (s.7(3))</td></tr><tr><td>Pregnant; pregnancy ends before the 90 days expire</td><td>90 days expire</td></tr><tr><td>Pregnant; pregnancy ends after the 90 days expire</td><td>when the pregnancy ends</td></tr><tr><td>Conceives after pronouncement</td><td>s.7(5) not engaged on its words</td></tr><tr><td>How the pregnancy “ends” (birth, miscarriage)</td><td>text silent; open to argument</td></tr></table>'},
+ {id:'r8',code:'s.7(6)',term:'Remarrying the same husband',sub:'Free after the first and second effective talaq; detour after the third',exam:true,tests:'third effective talaq',
+  hook:'Twice you may come back freely; the third effective talaq needs a detour.',
+  text:'<b>(6)</b> Nothing shall debar a wife whose marriage has been terminated by talaq effective under this section from re-marrying the same husband, without an intervening marriage with a third person unless such termination is for the third time so effective.',
+  plain:[['effective under this section','only a talaq that has actually become effective under s.7 counts; one revoked or still within its ninety days does not.'],['intervening marriage with a third person','an actual marriage to someone else in between.'],['for the third time so effective','the third effective termination between the same two people.']],
+  links:[['s.7(3)','r5']],cases:[],
+  bnd:'<h4>Boundary map: count of effective talaqs</h4><table><tr><th>Effective talaq no.</th><th>Remarry same husband without an intervening marriage?</th></tr><tr><td>1st</td><td>yes</td></tr><tr><td>2nd</td><td>yes</td></tr><tr><td>3rd</td><td>no, unless there is an intervening marriage with a third person</td></tr><tr><td>Revoked, or not yet effective</td><td>does not count towards the three</td></tr></table><p>The text does not use the word halala and does not say what the intervening marriage must involve. Anything beyond the words is outside the Ordinance.</p>'}
+ ],
+ spar:[
+  {q:'Notice is delivered to the Chairman on 1 March. The wife is not pregnant and nothing is revoked. When does the talaq take effect, and what is the Chairman’s separate deadline?',a:'Not before the ninety days from 1 March expire (s.7(3)); on the reading in this app, effective from the 91st day. The Chairman must constitute the Arbitration Council within thirty days of receiving the notice (s.7(4)). The two periods run side by side.'},
+  {q:'Cross-module: a wife holds a delegated right of divorce and exercises it. How does s.8 route her through s.7, and what happens if she withdraws on Day 40?',a:'s.8 applies s.7 with the necessary changes, so far as applicable: she gives notice, the Council is formed, the 90 days run. A withdrawal inside the 90 days is a revocation under s.7(3). The Supreme Court’s Hassan Sultan judgment (Nov 2025) upheld a withdrawal of this kind.'},
+  {q:'The wife is pregnant when talaq is pronounced and gives birth on Day 60, or on Day 120, after notice on Day 0. When does the talaq take effect in each case?',a:'Birth on Day 60: the ninety days are the later period, so effective once they expire. Birth on Day 120: the pregnancy is the later period, so effective when it ends, on Day 120 (s.7(5)).'},
+  {q:'Cross-section: the same couple have had two effective talaqs and remarried freely. A third talaq becomes effective. May they remarry without more? Compare with the s.6 polygamy gate: which requires a prior permission and which a prior marriage?',a:'After the third effective talaq they cannot remarry without an intervening marriage with a third person (s.7(6)). Under s.6 the man needs the Arbitration Council’s written permission before a further marriage while one subsists; under s.7(6) the barrier is a marriage by the wife to someone else.'}
+ ]
+};
+
+MD[5].gate={title:'Walk a case through s.7',timeline:true,steps:[
+ {id:'pron',t:'Talaq pronounced in any form?',ref:'s.7(1)',q:'Has the husband pronounced talaq, in any form?',
+  y:{n:'Any form whatsoever brings s.7 into play.'},
+  n:{n:'No pronouncement, no talaq.',end:'No talaq has been pronounced, so s.7 has nothing to act on. The marriage continues.'}},
+ {id:'notice',t:'Written notice to the Chairman, copy to the wife',ref:'s.7(1), s.7(2)',q:'Has the husband given the Chairman written notice and supplied a copy to the wife?',
+  y:{n:'Notice delivered: the ninety days run from the day it reaches the Chairman (s.7(3)). Enter that date below to see the dates.'},
+  n:{n:'No notice: the s.7(3) clock has not started, and s.7(2) punishes the omission.',end:'The ninety days run only from delivery of notice to the Chairman (s.7(3)), so the clock has not started. The husband is exposed to s.7(2): simple imprisonment up to one year, or fine up to Rs 5,000, or both. Whether a talaq without notice can ever take effect is not answered by the text. Gardezi (PLD 1963 SC 51) is cited on notice being mandatory; later authority has not been traced.'}},
+ {id:'jafri',t:'Fiqah-e-Jafria parties?',ref:'s.7(1) proviso, s.7(1A)',q:'Do the parties belong to Fiqah-e-Jafria?',
+  y:{n:'The proviso applies: free-will pronouncement in literal Arabic words before two witnesses; ineffective if jokingly or under anger, intoxication, insanity, duress or coercion; disputes to a court or a Mujtahid-e-Alam. Later steps assume a valid pronouncement.'},
+  n:{n:'Ordinary route: the proviso and s.7(1A) are not engaged.'}},
+ {id:'council',t:'Arbitration Council within thirty days',ref:'s.7(4)',q:'Did the Chairman constitute the Arbitration Council within thirty days of receiving the notice?',
+  y:{n:'Council constituted: it must take all steps necessary to bring about reconciliation.'},
+  n:{n:'Deadline missed: s.7(4) states a duty but not what a miss does to the ninety days. Reading: the s.7(3) clock still runs from delivery of notice.'}},
+ {id:'preg',t:'Wife pregnant at pronouncement?',ref:'s.7(5)',q:'Was the wife pregnant at the time talaq was pronounced?',
+  y:{n:'Pregnant: effective on the later of the ninety days and the end of the pregnancy.'},
+  n:{n:'Not pregnant at pronouncement: the plain ninety days apply. A later conception does not engage s.7(5), which speaks of the time of pronouncement.'}},
+ {id:'rev',t:'Revoked before it took effect?',ref:'s.7(3)',q:'Was the talaq revoked, expressly or otherwise, before the period ended?',
+  y:{n:'Revoked earlier.',end:'Revoked earlier, expressly or otherwise: the talaq never becomes effective under s.7(3) and the marriage continues. The Supreme Court (Hassan Sultan, Nov 2025) upheld a revocation within the ninety days, including a wife’s withdrawal of a notice given under a delegated right.'},
+  n:{n:'Not revoked: continue to the result.'}},
+ {id:'third',t:'Third effective talaq between them?',ref:'s.7(6)',q:'Is this the third time a talaq between these two has become effective under s.7?',
+  y:{n:'Third effective talaq: no remarriage to the same husband without an intervening marriage with a third person.'},
+  n:{n:'First or second effective talaq: remarriage to the same husband is not barred.'}}
+],
+ final:function(m){
+  var preg=m.preg==='y',third=m.third==='y';
+  var r=preg?'Effective on the <b>later of</b> (a) the expiry of ninety days from the day notice is delivered to the Chairman and (b) the end of the pregnancy (s.7(5)).':'Effective on the <b>expiry of ninety days</b> from the day notice is delivered to the Chairman (s.7(3)).';
+  if(S.date)r+='<br>Day 0: '+dstr(addDays(S.date,0))+'. Council deadline (Day 30): '+dstr(addDays(S.date,30))+'. Ninety days expire at the end of '+dstr(addDays(S.date,90))+'; on the reading in this app the talaq is effective from '+dstr(addDays(S.date,91))+(preg?' at the earliest, if the pregnancy has ended by then':'')+'.';
+  r+='<br>Remarriage to the same husband: '+(third?'barred without an intervening marriage with a third person (s.7(6)).':'not barred (s.7(6)).');
+  return r;
+ }};
+
+MD[6]={
+ tag:'Module 6 · s.8 · Accordion',
+ title:'Dissolution otherwise than by talaq',
+ intro:'Section 8 is one sentence long. It does not create a right to dissolve a marriage; it sends two situations through the procedure of section 7: a wife exercising a delegated right of divorce, and any party dissolving the marriage by some route other than talaq.',
+ recall:'Two triggers: the right to divorce was delegated to the wife and she uses it, or any party wants to dissolve otherwise than by talaq. In both, s.7 applies mutatis mutandis, so far as applicable. The section names neither khula nor the Dissolution of Muslim Marriages Act 1939.',
+ rails:[
+ {id:'r1',code:'s.8',term:'The section in full',sub:'A borrowing section: it applies section 7 with changes as needed',ess:'duly delegated; otherwise than by talaq; mutatis mutandis',exam:true,
+  hook:'Section 8 owns no procedure of its own; it rents section 7’s.',
+  text:'<b>8. Dissolution of marriage otherwise than by talaq.</b>&mdash;Where the right to divorce has been duly delegated to the wife and she wishes to exercise that right, or where any of the parties to a marriage wishes to dissolve the marriage otherwise than by talaq, the provisions of section 7 shall, <i>mutatis mutandis</i> and so far as applicable, apply.',
+  plain:[['duly delegated','the husband must have validly given the wife the power; the usual place is a clause of the nikah nama, and the text does not say where it must be recorded.'],['otherwise than by talaq','any route except the husband’s pronouncement; the text names none.'],['mutatis mutandis','with the necessary changes in the names and roles.'],['so far as applicable','a limit: the parts of s.7 that fit are used and the rest are not.']],
+  ex:'A nikah nama gives the wife the right to pronounce divorce on herself. She exercises it. Under s.8 she gives written notice to the Chairman, with a copy to the husband, and the ninety days and the Council run as for a talaq. Reading of the text; the changes of role are not spelled out.',
+  links:[['s.7 procedure','5:r1'],['s.7(1) notice','5:r1'],['s.7(3) ninety days','5:r5'],['s.10 and the nikah nama','8:r2'],['s.13 omitted DMMA amendment','9:r4']],
+  cases:[
+   {n:'Khurshid Bibi v Baboo Muhammad Amin',c:'PLD 1967 SC 97',t:'Commonly cited for the Supreme Court’s recognition of khula, with the court able to dissolve the marriage where the wife shows she cannot live within the limits of Allah. Citation from memory.',v:2},
+   {n:'Supreme Court decisions on khula and the husband’s consent (titles not given in the reports)',c:'Supreme Court of Pakistan, reported 2024 to 2026',t:'Reported as dealing with whether khula requires the husband’s consent. Only secondary reports were seen; read the judgments before relying on them.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: routes to ending a marriage</h4><table><tr><th>Route</th><th>Governed by s.7 procedure?</th></tr><tr><td>Talaq by the husband</td><td>yes: s.7 itself</td></tr><tr><td>Delegated talaq by the wife</td><td>yes: s.8, first limb</td></tr><tr><td>Any other dissolution sought by a party</td><td>yes, so far as applicable: s.8, second limb</td></tr><tr><td>Death of a spouse</td><td>no: the marriage ends without dissolution</td></tr><tr><td>Decree of a court</td><td>the text does not say; the interaction with s.7 is open to argument</td></tr></table>'},
+ {id:'r2',code:'s.8 (first limb)',term:'Delegated right of divorce exercised by the wife',sub:'The wife stands where the husband stood',tests:'duly delegated; wife’s notice to the Chairman',
+  hook:'When the husband lends the power, the wife walks the same road he would.',
+  text:'<b>8.</b> … Where the right to divorce has been duly delegated to the wife and she wishes to exercise that right, … the provisions of section 7 shall, <i>mutatis mutandis</i> and so far as applicable, apply.',
+  plain:[['the right to divorce … delegated','also called tafweez-e-talaq; the term is not used in the text.'],['she wishes to exercise that right','she, not the husband, gives the s.7(1) notice.']],
+  links:[['s.7(1) notice and copy','5:r1'],['s.7(4) Council','5:r4'],['s.7(5) pregnancy','5:r6'],['s.7(3) 90 days','5:r5']],cases:[],
+  bnd:'<h4>Boundary map: s.7 steps as they map to a delegated divorce</h4><table><tr><th>s.7 step</th><th>Reading under s.8</th></tr><tr><td>Man pronouncing talaq</td><td>wife exercising the delegated right</td></tr><tr><td>Notice to Chairman, copy to the other party</td><td>wife gives notice to the Chairman, copy to the husband</td></tr><tr><td>Council tries to bring about reconciliation</td><td>unchanged</td></tr><tr><td>Effectiveness after ninety days</td><td>unchanged</td></tr><tr><td>Pregnancy of the wife</td><td>unchanged: the wife is the one divorcing herself and the pregnancy bar still runs</td></tr><tr><td>Penalty for no notice (s.7(2))</td><td>the penalty names “any man”; whether it reaches a wife is open to argument</td></tr></table>'},
+ {id:'r3',code:'s.8 (second limb)',term:'Any party dissolving otherwise than by talaq',sub:'Wide words with no named route',tests:'what the second limb covers',
+  hook:'The second limb is a net with no label on it.',
+  text:'<b>8.</b> … or where any of the parties to a marriage wishes to dissolve the marriage otherwise than by talaq, the provisions of section 7 shall, <i>mutatis mutandis</i> and so far as applicable, apply.',
+  plain:[['any of the parties','husband or wife.'],['otherwise than by talaq','the text does not say what these are; khula and judicial dissolution are the usual examples from outside the text.'],['so far as applicable','a court decree cannot sensibly give a notice to the Chairman; where applicable, the s.7 steps govern.']],
+  links:[['s.13 omitted','9:r4'],['s.7','5:r1']],
+  cases:[
+   {n:'Khurshid Bibi v Baboo Muhammad Amin',c:'PLD 1967 SC 97',t:'Citation from memory: khula by court decree. Whether the s.7 procedure is also required for a khula decree is not settled by the text of s.8.',v:2}
+  ],
+  bnd:'<h4>Boundary map: what the second limb is not</h4><table><tr><th>Item</th><th>In the text of s.8?</th></tr><tr><td>Khula</td><td>not named</td></tr><tr><td>Dissolution of Muslim Marriages Act 1939</td><td>not named</td></tr><tr><td>Mubarat (mutual release)</td><td>not named</td></tr><tr><td>Judicial decree</td><td>not named</td></tr></table><p>The handoff’s list of these routes is outside the text of the section. Treat any claim that s.8 “covers khula” as an interpretation, not a quotation.</p>'}
+ ],
+ spar:[
+  {q:'Section 8 says s.7 applies “so far as applicable”. Give one step of s.7 that fits a wife’s delegated divorce and one that fits awkwardly.',a:'Fits: the notice to the Chairman with a copy to the other party, and the ninety-day period. Awkward: s.7(2), the penalty, is addressed to “any man” who fails to give notice, so whether it reaches a wife who fails is open to argument.'},
+  {q:'A wife seeks dissolution by court decree under the Dissolution of Muslim Marriages Act 1939. Does s.8 require her to give a notice to the Chairman?',a:'The text of s.8 does not mention the 1939 Act or decrees. It speaks of a party who “wishes to dissolve the marriage otherwise than by talaq”. Whether a court decree needs the s.7 notice is open to argument; the text does not settle it.'},
+  {q:'Cross-module: a nikah nama delegates the right of divorce to the wife and leaves the dower column blank. She exercises the right. What dower does she get and when, and what happens to the marriage?',a:'Section 10: with no mode of payment specified, the entire dower is payable on demand. The marriage ends under s.8 by applying the s.7 procedure: notice, Council, and effectiveness ninety days after notice, unless she is pregnant.'},
+  {q:'Cross-module: the husband remarries while his wife’s delegated divorce is still inside its ninety days. Is s.6 engaged?',a:'On the same reading as for a talaq, her marriage has not yet ended, so he contracts another marriage during an existing one and needs the Council’s previous permission (s.6(1)). A reading from ss.6, 7 and 8 together; not tested in a case.'}
+ ]
+};
+
+MD[7]={
+ tag:'Module 7 · s.9 · Accordion',
+ title:'Maintenance',
+ intro:'Section 9 gives a wife (or several wives) a quick route to a maintenance order: apply to the Chairman, who forms an Arbitration Council, which issues a certificate fixing the amount. Revision goes to the Collector. Arrears are recoverable as arrears of land revenue.',
+ recall:'Husband fails to maintain adequately (or equitably, among wives). Wife applies to the Chairman. Council issues a certificate with an amount (1). Either side may seek revision to the Collector; final (2). Unpaid amounts are recovered as arrears of land revenue (3).',
+ rails:[
+ {id:'r1',code:'s.9(1)',term:'Failure to maintain: the application and the certificate',sub:'“Adequately” for one wife; “equitably” among several; other remedies remain',ess:'fails to maintain adequately or equitably; apply to the Chairman; Council certificate',exam:true,
+  hook:'One wife is owed enough; several are owed fairness.',
+  text:'<b>9. Maintenance.</b>&mdash;<b>(1)</b> If any husband fails to maintain his wife adequately, or where there are more wives than one, fails to maintain them equitably, the wife, or all or any of the wives, may in addition to seeking, any other legal remedy available apply to the Chairman who shall constitute an Arbitration Council to determine the matter, and the Arbitration Council may issue a certificate specifying the amount which shall be paid as maintenance by the husband.',
+  plain:[['adequately … equitably','two measures: “adequately” for a single wife, “equitably” where there are several.'],['all or any of the wives','one wife may apply, or all together.'],['in addition to seeking any other legal remedy','this route sits beside others (a suit in the Family Court, for example); it does not displace them.'],['may issue a certificate','a discretion: the Council may; the text does not say “shall”.']],
+  ex:'A husband with two wives spends heavily on the second household and leaves the first without enough. The first wife applies to the Chairman under s.9(1). The Council can issue a certificate fixing what he must pay her; she keeps her other remedies.',
+  links:[['s.2(a) Council','1:r4'],['s.9(2) revision','r2'],['s.9(3) recovery','r3'],['s.6 polygamy','4:r1'],['s.9(1A) Punjab text','r4']],
+  cases:[
+   {n:'Supreme Court on a wife’s maintenance during a subsisting marriage (titles not given)',c:'Supreme Court of Pakistan, reported 2024 to 2026',t:'Several reports describe the court treating a husband’s duty to maintain his wife as continuing while the marriage subsists. Only secondary reports were seen; no case is relied on here.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: how many wives, which standard</h4><table><tr><th>Wives</th><th>Standard of maintenance</th><th>Who applies</th></tr><tr><td>One</td><td>adequate</td><td>the wife</td></tr><tr><td>Two or more</td><td>equitable among them</td><td>any wife, some, or all</td></tr></table><table><tr><th>Maintenance</th><th>Within s.9(1)?</th></tr><tr><td>Paid in full</td><td>no failure, no application</td></tr><tr><td>Paid, but too little</td><td>yes: not adequate</td></tr><tr><td>Not paid at all</td><td>yes</td></tr><tr><td>Child’s maintenance</td><td>not in the federal text; see the Punjab text in the last rail</td></tr></table>'},
+ {id:'r2',code:'s.9(2)',term:'Revision to the Collector',sub:'Husband or wife; prescribed manner, period and fee; final',ess:'revision of the certificate; Collector; final',exam:true,
+  hook:'Either side may ask the Collector to look again; after that, no further door.',
+  text:'<b>(2)</b> A husband or wife may, in the prescribed manner, within the prescribed period, and on payment of the prescribed fee, prefer an application for revision of the certificate, to the Collector concerned and his decision shall be final and shall not be called in question in any Court.',
+  plain:[['A husband or wife','either may seek revision: the husband to reduce it, the wife to raise it.'],['prescribed manner, period, fee','left to the Rules.'],['final … not … called in question in any Court','the text excludes court challenge; how far that holds is outside the Ordinance and not checked.']],
+  links:[['s.6(4) the same device','4:r4'],['s.11 Rules','9:r1']],cases:[],
+  bnd:'<h4>Boundary map: after the certificate issues</h4><table><tr><th>Who is unhappy</th><th>Remedy in s.9(2)</th></tr><tr><td>Husband (too high)</td><td>revision to the Collector</td></tr><tr><td>Wife (too low)</td><td>revision to the Collector</td></tr><tr><td>Neither</td><td>certificate stands; s.9(3) recovery</td></tr><tr><td>Either, after the Collector decides</td><td>final on the words</td></tr></table>'},
+ {id:'r3',code:'s.9(3)',term:'Recovery as arrears of land revenue',sub:'Amount payable under (1) or (2), if not paid in due time',ess:'if not paid in due time; arrears of land revenue',exam:true,
+  hook:'A maintenance certificate collects like a tax bill.',
+  text:'<b>(3)</b> Any amount payable under sub-section (1) or (2), if not paid in due time, shall be recoverable as arrears of land revenue.',
+  plain:[['under sub-section (1) or (2)','the original certificate, or the amount as revised by the Collector.'],['in due time','the time set by the certificate; the text does not state a default period.'],['arrears of land revenue','recovered by the revenue machinery.']],
+  links:[['s.6(5)(a) dower recovered the same way','4:r5']],cases:[],
+  bnd:'<h4>Boundary map: two ways to collect in the Ordinance</h4><table><tr><th>Provision</th><th>What is recovered</th></tr><tr><td>s.6(5)(a)</td><td>dower due to existing wives after an unpermitted marriage</td></tr><tr><td>s.9(3)</td><td>maintenance fixed by certificate or revision</td></tr></table>'},
+ {id:'r4',code:'s.9(1A) (Punjab text)',term:'Child maintenance: not in the federal text',sub:'A Punjab Police compilation shows an added sub-section; amending Act not traced',tests:'text variant: federal against Punjab',
+  hook:'Check which text you are reading before you quote a sub-section number.',
+  text:'<i>Not reproduced.</i> The bare act used in this app (updated till 10-3-2022) has no sub-section (1A) in section 9.',
+  plain:[['Punjab compilation','shows a sub-section (1A) on a child’s maintenance; the amending Act is not identified in this build, and the wording was not verified.']],
+  links:[['s.9(1)','r1']],cases:[],
+  bnd:'<h4>Boundary map: text versions</h4><table><tr><th>Text</th><th>s.9 sub-sections</th></tr><tr><td>Federal bare act (to 10-3-2022)</td><td>(1), (2), (3)</td></tr><tr><td>Punjab Police compilation (undated)</td><td>(1), (1A), (2), (3), as printed there</td></tr></table>'}
+ ],
+ spar:[
+  {q:'A husband has two wives. He supports the first well and the second badly. Who may apply under s.9(1), and on what standard?',a:'The second wife (or both, since the section lets “all or any of the wives” apply). The standard for several wives is “equitably”, not “adequately”. The Council may issue a certificate fixing what he pays.'},
+  {q:'A certificate fixes Rs 20,000 a month. The husband does not pay for four months. How does the wife recover, and can the husband challenge the certificate?',a:'Under s.9(3) the arrears are recoverable as arrears of land revenue. The husband may seek revision to the Collector within the prescribed period (s.9(2)); the Collector’s decision is final.'},
+  {q:'Cross-module: compare the revision device in s.9(2) with s.6(4). What is the same and what is different?',a:'Same: revision goes to the Collector, in the prescribed manner, period and fee, and his decision is final and cannot be called in question in any court. Different: s.6(4) follows a decision on permission to marry again, where “any party” may apply; s.9(2) follows a maintenance certificate, where “a husband or wife” may apply.'},
+  {q:'Cross-module: a wife’s talaq is within its ninety-day period and the husband stops paying maintenance. Can she use s.9?',a:'On the reading in this app the marriage still subsists until the talaq takes effect (s.7(3)), so she is still “his wife” and s.9(1) is open to her. Not tested in a case.'}
+ ]
+};
+
+MD[8]={
+ tag:'Module 8 · s.10 · Accordion',
+ title:'Dower',
+ intro:'Section 10 is a default rule for silence: if the nikah nama or marriage contract does not say how dower is to be paid, the whole of it is payable on demand. The text says nothing about the amount, and it does not define prompt or deferred dower.',
+ recall:'No details of the mode of payment in the nikah nama or contract: the entire dower is payable on demand. Where details are given, they govern. Dower also surfaces in s.6(5)(a): entire dower, prompt or deferred, due at once after an unpermitted second marriage.',
+ rails:[
+ {id:'r1',code:'s.10',term:'Silence on the mode of payment: all on demand',sub:'A default rule, not a rule on the amount',ess:'no details about the mode of payment; entire amount; payable on demand',exam:true,
+  hook:'Say nothing in the contract and the law says: all of it, whenever she asks.',
+  text:'<b>10. Dower.</b>&mdash;Where no details about the mode of payment of dower are specified in the nikah nama, or the marriage contract, the entire amount of the dower shall be prescribed to be payable on demand.',
+  plain:[['no details about the mode of payment','the document is silent on how and when to pay.'],['nikah nama, or the marriage contract','either document can carry the terms.'],['entire amount','not half: the whole dower.'],['payable on demand','due when the wife asks; no waiting for divorce or death.'],['shall be prescribed to be','printed so in the bare act; read as “deemed to be”.']],
+  ex:'A nikah nama records a dower of Rs 500,000 and leaves the column on payment blank. Under s.10 the whole Rs 500,000 is payable on demand.',
+  links:[['s.6(5)(a)','4:r5'],['s.5(5) nikah nama form','3:r5'],['nikah nama details','r2']],
+  cases:[
+   {n:'Supreme Court on dower (titles not given in the reports)',c:'Supreme Court of Pakistan, reported 2024 to 2026',t:'Several reports describe judgments on dower as the wife’s property and on its recovery. No holding is relied on here; read the judgments before citing.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: what the contract says against what s.10 does</h4><table><tr><th>Nikah nama on payment</th><th>Result</th></tr><tr><td>Entire dower stated as prompt</td><td>payable on demand (the stated mode)</td></tr><tr><td>Part prompt, part deferred</td><td>as stated; s.10 does not apply</td></tr><tr><td>All deferred to a stated event</td><td>as stated; s.10 does not apply</td></tr><tr><td>Blank or silent on the mode</td><td>s.10: entire amount on demand</td></tr><tr><td>Silent on the amount too</td><td>s.10 does not fix an amount; the text is silent</td></tr></table>'},
+ {id:'r2',code:'s.10 and the nikah nama',term:'Where the details live',sub:'The nikah nama columns for dower and special conditions',tests:'where the mode of payment is recorded',
+  hook:'The rule only works if someone reads the columns aloud before signing.',
+  text:'<i>Not a separate section.</i> Section 5(5) leaves the form of the nikah nama to the Rules; section 10 refers to the nikah nama and the marriage contract as the documents that may state the mode of payment.',
+  plain:[['nikah nama','prescribed form under the Rules; see Module 3.'],['marriage contract','a wider term: terms agreed apart from the form.']],
+  links:[['s.5(5)','3:r5'],['s.10','r1']],
+  cases:[
+   {n:'Supreme Court directions to Registrars on completing the Nikahnama (title not given)',c:'Supreme Court of Pakistan, 22 September 2026',t:'Reported as directing Registrars to fill every column, read the dower and special-condition entries to the parties, and give them copies.',v:1,fl:'news report'}
+  ],
+  bnd:'<h4>Boundary map: documents that can fix the mode</h4><table><tr><th>Document</th><th>Counts under s.10?</th></tr><tr><td>Nikah nama</td><td>yes</td></tr><tr><td>Other marriage contract</td><td>yes: “or the marriage contract”</td></tr><tr><td>Oral understanding only</td><td>not mentioned; the text speaks of documents</td></tr></table>'},
+ {id:'r3',code:'s.10 with ss.6(5), 7',term:'Dower in the other modules',sub:'Where dower reappears',tests:'cross-module dower rules',
+  hook:'Dower is the thread that ties registration, polygamy and divorce together.',
+  text:'<i>Cross-reference rail.</i> Dower is mentioned in s.6(5)(a) (dower due at once after an unpermitted second marriage). The Ordinance does not mention dower in s.7 or s.8.',
+  plain:[['s.6(5)(a)','entire dower, prompt or deferred, immediately payable.'],['s.7 and s.8','no dower provision on the words; outside the Ordinance, a talaq does not remove a wife’s right to dower. That statement is general knowledge, not from the text.']],
+  links:[['s.6(5)(a)','4:r5'],['s.7','5:r1']],cases:[],
+  bnd:'<h4>Boundary map: dower provisions in the Ordinance</h4><table><tr><th>Section</th><th>Dower rule</th></tr><tr><td>s.6(5)(a)</td><td>entire dower payable immediately on an unpermitted marriage</td></tr><tr><td>s.10</td><td>unspecified mode: entire amount on demand</td></tr><tr><td>s.5(5)</td><td>form of the nikah nama (the document that records dower) left to the Rules</td></tr><tr><td>ss.7, 8</td><td>silent</td></tr></table>'}
+ ],
+ spar:[
+  {q:'A nikah nama says dower is Rs 300,000 and has no entry on the mode of payment. The husband says half is deferred until divorce. What does s.10 say?',a:'With no details of the mode of payment in the nikah nama or the marriage contract, the entire Rs 300,000 is payable on demand. His claim of an oral deferral does not appear in either document named by s.10.'},
+  {q:'Does s.10 tell you how much dower a wife is entitled to when the nikah nama states no amount?',a:'No. Section 10 is only about the mode of payment. The amount, if unstated, is outside the text.'},
+  {q:'Cross-module: a husband marries a second time without permission. His first wife’s dower was Rs 100,000, half deferred until divorce. When is it payable?',a:'Under s.6(5)(a), the entire dower, prompt or deferred, becomes payable immediately, and if unpaid is recoverable as arrears of land revenue.'},
+  {q:'Cross-module: does a wife who divorces herself under a delegated right (s.8) lose her dower?',a:'The text of ss.7 and 8 says nothing about dower, so the Ordinance does not take it away. The general Muslim-law position is outside the text and not checked here.'}
+ ]
+};
+
+MD[9]={
+ tag:'Module 9 · ss.11-13 · Accordion',
+ title:'Rules and omitted sections',
+ intro:'The closing sections do three small things: they let Government make rules, they allow a short penalty for breach of rules, and they record that sections 12 and 13 (amendments to two older Acts) were omitted in 1981.',
+ recall:'Rules are made by the Federal Government for Cantonments and the Provincial Government elsewhere (1). Breach may be punished up to one month or Rs 200 or both (2). Published rules have effect as if enacted in the Ordinance (3). Sections 12 and 13 are omitted.',
+ rails:[
+ {id:'r1',code:'s.11(1), (3)',term:'Power to make rules; publication gives them statutory force',sub:'Federal for Cantonment areas, Provincial elsewhere',ess:'Cantonment areas Federal; other areas Provincial; Gazette publication',exam:true,
+  hook:'The Ordinance is the skeleton; the rules fill in forms, fees and periods.',
+  text:'<b>11. Power to make rules.</b>&mdash;<b>(1)</b> The Federal Government in respect of the Cantonment areas and the Provincial Government in respect of other areas may make rules to carry into effect the purposes of this Ordinance.<br><b>(3)</b> Rules made under this section shall be published in the official Gazette, and shall thereupon have effect as if enacted in this Ordinance.',
+  plain:[['Federal … Cantonment areas','Cantonments are under federal rules.'],['Provincial … other areas','the provinces make rules for the rest.'],['published in the official Gazette','publication is the trigger.'],['as if enacted in this Ordinance','once published, the rules carry the force of the Ordinance’s own words.']],
+  links:[['s.2(c) prescribed','1:r6'],['s.5(5) form, fees','3:r5'],['s.6(2), (4) prescribed manner and fee','4:r2'],['s.9(2) prescribed period','7:r2']],cases:[],
+  bnd:'<h4>Boundary map: who makes the rules</h4><table><tr><th>Area</th><th>Rule-making authority</th></tr><tr><td>Cantonment areas</td><td>Federal Government</td></tr><tr><td>All other areas</td><td>Provincial Government</td></tr></table><table><tr><th>Matters left to the rules in the Ordinance</th><th>Section</th></tr><tr><td>Nikah nama form, registers, copies, fees</td><td>s.5(5)</td></tr><tr><td>Manner and fee of the polygamy application</td><td>s.6(2)</td></tr><tr><td>Manner, period, fee of revision</td><td>ss.6(4), 9(2)</td></tr></table>'},
+ {id:'r2',code:'s.11(2)',term:'Penalty for breach of rules',sub:'Only if the rules so provide: up to one month, Rs 200, or both',ess:'rules may provide; 1 month or Rs 200 or both',exam:true,
+  hook:'The smallest penalty in the Ordinance, and it exists only if the rules switch it on.',
+  text:'<b>(2)</b> In making rules under this section, the such Government may provide that a breach of any of the rules shall be punishable with simple imprisonment which may extend to one month, or with fine which may extent to two hundred rupees, or with both.',
+  plain:[['may provide','optional: no penalty exists unless the rules create it.'],['simple imprisonment … one month','the ceiling.'],['fine … two hundred rupees','the ceiling; “extent” is a misprint in the bare act, “the such Government” is as printed.']],
+  links:[['s.5(4)','3:r4'],['s.6(5)(b)','4:r6']],cases:[],
+  bnd:'<h4>Boundary map: penalties by source</h4><table><tr><th>Source</th><th>Offence</th><th>Ceiling (bare act)</th></tr><tr><td>s.5(4)</td><td>not reporting a marriage</td><td>3 months, Rs 1,000</td></tr><tr><td>s.6(5)(b)</td><td>unpermitted marriage</td><td>1 year, Rs 5,000</td></tr><tr><td>s.7(2)</td><td>no notice of talaq</td><td>1 year, Rs 5,000</td></tr><tr><td>s.11(2)</td><td>breach of rules, if rules say so</td><td>1 month, Rs 200</td></tr></table>'},
+ {id:'r3',code:'s.12',term:'Amendment of the Child Marriage Restraint Act, 1929: omitted',sub:'Omitted by Ordinance XXVII of 1981',tests:'what is no longer in the Ordinance',
+  hook:'A section that survives only as a heading.',
+  text:'<b>12.</b> [Amendment of Child Marriage Restraint Act, 1929 (XIX of 1929).] Omitted by the Federal Laws (Revision and declaration) Ordinance, 1981 (XXVII of 1981), s. 3 and Sch., II.',
+  plain:[['Omitted','the text is gone; the Ordinance does not now amend the 1929 Act. There is no age threshold anywhere in the Ordinance.']],
+  links:[['s.13','r4']],cases:[],
+  bnd:'<h4>Boundary map: ages in the Ordinance</h4><table><tr><th>Question</th><th>Answer in the Ordinance</th></tr><tr><td>Minimum age of marriage</td><td>none stated</td></tr><tr><td>Source of any age rule</td><td>outside the Ordinance (not covered here)</td></tr></table>'},
+ {id:'r4',code:'s.13',term:'Amendment of the Dissolution of Muslim Marriages Act, 1939: omitted',sub:'Omitted by Ordinance XXVII of 1981',tests:'what is no longer in the Ordinance',
+  hook:'The 1939 Act stands on its own; section 13 once touched it and no longer does.',
+  text:'<b>13.</b> [Amendment of the Dissolution of Muslim Marriages Act, 1939 (VIII of 1939)]. Omitted by the Federal Laws (Revision and declaration) Ordinance, 1981 (XXVII of 1981), s. 3 and Sch., II.',
+  plain:[['Omitted','the amendment is gone from the Ordinance. Section 8 does not name the 1939 Act.']],
+  links:[['s.8','6:r1'],['s.12','r3']],cases:[],
+  bnd:'<h4>Boundary map: omitted sections</h4><table><tr><th>Section</th><th>Subject</th><th>Status</th></tr><tr><td>12</td><td>Child Marriage Restraint Act 1929</td><td>omitted 1981</td></tr><tr><td>13</td><td>Dissolution of Muslim Marriages Act 1939</td><td>omitted 1981</td></tr></table>'}
+ ],
+ spar:[
+  {q:'A province publishes rules setting the nikah nama form and a fee. Where does their force come from?',a:'Section 11(1) gives the Provincial Government the power for areas other than Cantonments, and s.11(3) makes published rules have effect as if enacted in the Ordinance.'},
+  {q:'The rules provide that a Registrar who fails to keep a register is punishable with imprisonment up to three months. Is that valid under s.11(2)?',a:'On the words, no: s.11(2) caps the penalty for breach of rules at one month, Rs 200, or both. A higher penalty would exceed the Ordinance’s ceiling.'},
+  {q:'Cross-module: name three places in the Ordinance where something is left to be “prescribed”, and say who fills the gap.',a:'Section 5(5) (nikah nama form, registers, fees), s.6(2) and (4) (manner, fee, period of application and revision), and s.9(2) (revision of a maintenance certificate). The gap is filled by rules under s.11.'}
+ ]
+};
+
+
+/* ---------- STATE ---------- */
+var VER='v2.1';
+var S={view:'home',mod:0,filter:'all',q:'',mq:'',open:null,fs:1.2,spar:false,ans:[],date:''};
+try{var f=parseFloat(localStorage.getItem('mflo_fs'));if(f>=0.8&&f<=1.4)S.fs=f;S.spar=localStorage.getItem('mflo_spar')==='1';}catch(e){}
+function save(){try{localStorage.setItem('mflo_fs',String(S.fs));localStorage.setItem('mflo_spar',S.spar?'1':'0');}catch(e){}}
+var $app=document.getElementById('app');
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function strip(s){return String(s).replace(/<[^>]+>/g,' ')}
+function info(n){return MODS.filter(function(m){return m.n===n})[0]}
+function tgt(n,t){return t.indexOf(':')>-1?t:n+':'+t}
+function dstr(d){return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})}
+function addDays(s,n){var p=s.split('-');var d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));d.setUTCDate(d.getUTCDate()+n);return d}
+/* ---------- HOME ---------- */
+function fbHTML(){return '<div class="fb"><b data-act="fs" data-d="-1">A&minus;</b><span>'+Math.round(S.fs*100)+'%</span><b data-act="fs" data-d="1">A+</b></div>'}
+function blob(m){
+ var d=MD[m.n],b=m.t+' '+m.sec+' '+m.tag+' '+d.title+' '+d.intro;
+ d.rails.forEach(function(r){b+=' '+r.code+' '+r.term+' '+r.sub+' '+strip(r.text)+' '+r.hook+' '+(r.cases||[]).map(function(c){return c.n}).join(' ')});
+ return b.toLowerCase();
+}
+function home(){
+ var h='<div class="title serif">MFLO Navigator</div><div class="sub">Muslim Family Laws Ordinance, 1961 &middot; Ordinance VIII of 1961</div>';
+ h+='<input class="search" id="hq" placeholder="Search sections, terms, cases..." value="'+esc(S.q)+'">';
+ h+='<div class="toggle '+(S.spar?'on':'')+'" data-act="spar"><div class="sw"></div><span>'+(S.spar?'ON &mdash; Sparring Mode':'OFF &mdash; Classroom Mode')+'</span></div>';
+ h+='<div class="arcs"><div class="arc a1" data-act="pill" data-f="n"><h3 class="serif">Entering marriage</h3><p>ss.5, 6, 10<br>Registration &middot; Polygamy &middot; Dower</p></div><div class="arc a2" data-act="pill" data-f="e"><h3 class="serif">Ending &amp; consequences</h3><p>ss.7, 8, 9, 4<br>Talaq &middot; Dissolution &middot; Maintenance &middot; Succession</p></div></div>';
+ h+='<div class="pills">';
+ [['all','All'],['f','Frame'],['n','Entering'],['e','Ending']].forEach(function(p){h+='<span class="pill '+(S.filter===p[0]?'on':'')+'" data-act="pill" data-f="'+p[0]+'">'+p[1]+'</span>'});
+ h+='</div><div id="cards">'+cards()+'</div>';
+ h+=fbHTML()+'<div class="foot">'+VER+'</div>';
+ return h;
+}
+function cards(){
+ var q=S.q.toLowerCase(),h='',n=0;
+ MODS.forEach(function(m){
+  if(S.filter!=='all'&&m.arc!==S.filter)return;
+  if(q&&blob(m).indexOf(q)<0)return;
+  n++;
+  h+='<div class="mod '+m.arc+'" data-act="open" data-n="'+m.n+'"><div class="n">'+m.n+'</div><div class="t">'+m.t+'<small>'+m.tag+'<span class="cnt">'+MD[m.n].rails.length+' rails</span></small></div><span class="sec '+(m.arc==='e'?'gt':'')+'">'+m.sec+'</span></div>';
+ });
+ return n?h:'<div class="empty">Nothing matches.</div>';
+}
+/* ---------- RAILS ---------- */
+function railHTML(n,r){
+ var id='m'+n+'-'+r.id;
+ var h='<div class="rail'+(S.open===r.id?' open':'')+'" id="'+id+'"><div class="rh" data-act="rail" data-id="'+r.id+'"><div class="c">'+r.code+'</div><div class="tt"><b>'+r.term+'</b><em>'+r.sub+'</em><div class="mk">';
+ if(r.ess)h+='<i class="ess">&#9733; Essential element &middot; '+r.ess+'</i>';
+ if(r.tests)h+='<i class="tests">Tests: '+r.tests+'</i>';
+ if(r.exam)h+='<i class="exam">&#9670; Exam priority</i>';
+ h+='</div></div></div><div class="rb"><div class="hook">'+r.hook+'</div><div class="pos">'+r.text+'</div><div class="pw">';
+ r.plain.forEach(function(p){h+='<div><strong>'+p[0]+'</strong> - '+p[1]+'</div>'});
+ h+='</div>';
+ if(r.ex)h+='<div class="ex"><b>Worked example (mine, not statute)</b>'+r.ex+'</div>';
+ h+='<div class="links">';
+ r.links.forEach(function(l){h+='<span class="xlink" data-act="link" data-to="'+tgt(n,l[1])+'">'+l[0]+'</span>'});
+ h+='</div><div class="cases"><h4>Landmark cases</h4>';
+ if(!r.cases.length)h+='<div class="case">No case attached yet. <span class="flag">none verified</span></div>';
+ r.cases.forEach(function(c){h+='<div class="case"><b>'+c.n+'</b>, '+c.c+(c.v===2?'<span class="flag">unverified holding</span>':(c.fl?'<span class="flag ok">'+c.fl+'</span>':''))+'<br>'+c.t+'</div>'});
+ h+='</div>';
+ if(r.bnd)h+='<div class="bnd">'+r.bnd+'</div>';
+ return h+'</div></div>';
+}
+/* ---------- GATE ---------- */
+function stepIdx(g,id){for(var i=0;i<g.steps.length;i++)if(g.steps[i].id===id)return i;return -1}
+function walk(g){
+ var path=[],i=0,end=null,fin=false,k;
+ for(k=0;k<S.ans.length;k++){
+  var st=g.steps[i],v=S.ans[k],br=st[v];
+  path.push({i:i,v:v});
+  if(br.end){end=br.end;i=-1;break}
+  i=br.go?stepIdx(g,br.go):i+1;
+  if(i>=g.steps.length){fin=true;i=-1;break}
+ }
+ return {path:path,active:(end||fin)?-1:i,end:end,fin:fin};
+}
+function gate(n){
+ var g=MD[n].gate,w=walk(g),vis={},map={},list=[];
+ w.path.forEach(function(p){vis[p.i]=p.v;map[g.steps[p.i].id]=p.v});
+ var ref=w.active>=0?w.active:(w.path.length?w.path[w.path.length-1].i:-1);
+ g.steps.forEach(function(st,k){
+  if(vis[k]!==undefined)list.push([k,'done']);
+  else if(k===w.active)list.push([k,'act']);
+  else if(k>ref)list.push([k,'pend']);
+ });
+ var h='<div class="gate"><h3 class="serif">'+g.title+'</h3>';
+ list.forEach(function(it,pos){
+  var k=it[0],cls=it[1],st=g.steps[k];
+  h+='<div class="step '+cls+'"><div class="rail-l"><div class="dot">'+(cls==='done'?'&#10003;':(k+1))+'</div>'+(pos<list.length-1?'<div class="ln"></div>':'')+'</div><div class="sb"><b>'+st.t+'</b><small>'+st.ref+(cls==='done'?' &middot; '+(vis[k]==='y'?'Yes':'No'):'')+'</small>';
+  if(cls==='done')h+='<div class="nt">'+st[vis[k]].n+'</div>';
+  if(cls==='act'){h+='<div class="q">'+st.q+'<div class="btns">'+(S.ans.length?'<div class="btn bk" data-act="back">Back</div>':'')+'<div class="btn" data-act="ans" data-v="n">No</div><div class="btn y" data-act="ans" data-v="y">Yes</div></div></div>'}
+  h+='</div></div>';
+ });
+ if(g.timeline){
+  h+='<div class="tl"><label>Notice delivered to the Chairman on <input type="date" id="nd" value="'+S.date+'"></label><div class="bar"><div class="f"></div><div class="m" style="left:0"><u>Day 0</u><span>'+(S.date?dstr(addDays(S.date,0)):'notice')+'</span></div><div class="m" style="left:33.3%"><u>Day 30</u><span>'+(S.date?dstr(addDays(S.date,30)):'Council by')+'</span></div><div class="m" style="left:100%"><u>Day 90</u><span>'+(S.date?dstr(addDays(S.date,90)):'period ends')+'</span></div></div></div>';
+ }
+ var ctl='<br><span class="reset" data-act="back">Back</span> <span class="reset" data-act="reset">Start again</span>';
+ if(w.end)h+='<div class="res end"><b>Outcome</b><br>'+w.end+ctl+'</div>';
+ else if(w.fin)h+='<div class="res"><b>Outcome</b><br>'+g.final(map)+ctl+'</div>';
+ return h+'</div>';
+}
+/* ---------- MODULE ---------- */
+function module(n){
+ var d=MD[n],m=info(n),i=MODS.indexOf(m),pv=MODS[i-1],nx=MODS[i+1];
+ var h='<div class="top"><div class="home-btn" data-act="home">&#8962;</div><span class="tag">'+d.tag+'</span></div>';
+ h+='<div class="title serif">'+d.title+'</div><div class="intro">'+d.intro+'</div>';
+ if(d.note)h+='<div class="note">'+d.note+'</div>';
+ if(d.recall)h+='<div class="recall"><b>Quick recall</b>'+d.recall+'</div>';
+ var srch='<div class="msearch"><input id="mq" placeholder="Search this module..." value="'+esc(S.mq)+'"><button data-act="collapse">Collapse all</button></div>';
+ var rl='<div id="rails">'+d.rails.map(function(r){return railHTML(n,r)}).join('')+'</div>';
+ if(d.gate)h+='<div class="cols"><div>'+gate(n)+'</div><div>'+srch+rl+'</div></div>';
+ else h+=srch+'<div class="flat">'+rl+'</div>';
+ h+='<details class="spar" '+(S.spar?'open':'')+'><summary>Sparring questions ('+d.spar.length+')</summary>';
+ d.spar.forEach(function(s,k){h+='<div class="sq" id="sq'+k+'"><p>'+(k+1)+'. '+s.q+'</p><textarea placeholder="Your answer..."></textarea><br><button data-act="reveal" data-i="'+k+'">Reveal</button><div class="ans">'+s.a+'</div></div>'});
+ h+='</details>';
+ h+='<div class="legend"><i style="color:var(--gold)">&#9733; Essential element</i> - a named element of the section’s rule. <i>Tests: ...</i> - the rail applies an element. <i style="color:#8DB5F0">&#9670; Exam priority</i> - my judgement, not the instructor’s. <i style="color:var(--red)">unverified holding</i> - a case flag: the holding is not confirmed against the report. <i>Worked example</i> - my own illustration, not statute. Case cards marked <i>news report</i> were read online in a news or secondary source, not in a law report.</div>';
+ h+='<div class="navrow">'+(pv?'<div data-act="open" data-n="'+pv.n+'" style="cursor:pointer"><small>Previous</small>'+pv.n+' '+pv.t+'</div>':'<div class="soon"></div>')+(nx?'<div data-act="open" data-n="'+nx.n+'" style="text-align:right;cursor:pointer"><small>Next</small>'+nx.n+' '+nx.t+'</div>':'<div class="soon"></div>')+'</div>'+fbHTML();
+ return h;
+}
+function render(){
+ $app.style.setProperty('--fs',S.fs);
+ $app.innerHTML=S.view==='home'?home():module(S.mod);
+ if(S.view==='module'&&S.mq)filterRails();
+}
+function filterRails(){
+ var q=S.mq.toLowerCase();
+ document.querySelectorAll('#rails .rail').forEach(function(el){el.classList.toggle('hide',q&&el.textContent.toLowerCase().indexOf(q)<0)});
+}
+/* ---------- EVENTS ---------- */
+$app.addEventListener('click',function(e){
+ var t=e.target.closest('[data-act]');if(!t)return;
+ var a=t.getAttribute('data-act');
+ if(a==='open'){S.view='module';S.mod=+t.getAttribute('data-n');S.open=null;S.ans=[];S.mq='';render();window.scrollTo(0,0)}
+ else if(a==='home'){S.view='home';render();window.scrollTo(0,0)}
+ else if(a==='pill'){S.filter=t.getAttribute('data-f');render()}
+ else if(a==='spar'){S.spar=!S.spar;save();render()}
+ else if(a==='fs'){S.fs=Math.max(.8,Math.min(1.4,Math.round((S.fs+(+t.getAttribute('data-d'))*.1)*10)/10));save();render()}
+ else if(a==='rail'){var id=t.getAttribute('data-id');S.open=S.open===id?null:id;render()}
+ else if(a==='collapse'){S.open=null;render()}
+ else if(a==='link'){var p=t.getAttribute('data-to').split(':'),nm=+p[0];if(nm!==S.mod){S.mod=nm;S.ans=[]}S.open=p[1];S.mq='';render();var el=document.getElementById('m'+nm+'-'+p[1]);if(el)el.scrollIntoView({block:'start'})}
+ else if(a==='ans'){S.ans.push(t.getAttribute('data-v'));render()}
+ else if(a==='back'){S.ans.pop();render()}
+ else if(a==='reset'){S.ans=[];render()}
+ else if(a==='reveal'){document.getElementById('sq'+t.getAttribute('data-i')).classList.toggle('show')}
+});
+$app.addEventListener('input',function(e){
+ if(e.target.id==='hq'){S.q=e.target.value;document.getElementById('cards').innerHTML=cards()}
+ else if(e.target.id==='mq'){S.mq=e.target.value;filterRails()}
+});
+$app.addEventListener('change',function(e){if(e.target.id==='nd'){S.date=e.target.value;render()}});
+/* ---------- LINK + DATA CHECK ---------- */
+(function(){
+ var bad=[],ids={};
+ MODS.forEach(function(m){if(!MD[m.n])bad.push('nodata:'+m.n)});
+ Object.keys(MD).forEach(function(k){MD[k].rails.forEach(function(r){ids[k+':'+r.id]=1})});
+ Object.keys(MD).forEach(function(k){var d=MD[k];
+  d.rails.forEach(function(r){r.links.forEach(function(l){if(!ids[tgt(+k,l[1])])bad.push(k+':'+r.id+'>'+l[1])})});
+  if(d.spar.length<3)bad.push('spar<3:'+k);
+  if(d.gate){var g=d.gate;g.steps.forEach(function(s){['y','n'].forEach(function(v){if(s[v].go&&stepIdx(g,s[v].go)<0)bad.push('go:'+k+':'+s.id)})})}
+ });
+ if(bad.length)console.error('data problems: '+bad.join(','));
+ window.__bad=bad;window.__links=Object.keys(ids).length;
+})();
+render();
+</script>
+</body>
+</html>
